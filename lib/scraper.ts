@@ -1,8 +1,8 @@
 import puppeteer from 'puppeteer-extra';
+import puppeteerCore from 'puppeteer-core';
 import StealthPlugin from 'puppeteer-extra-plugin-stealth';
 import { KnownDevices } from 'puppeteer';
-import fs from 'fs';
-import path from 'path';
+import chromium from '@sparticuz/chromium';
 
 puppeteer.use(StealthPlugin());
 
@@ -14,16 +14,31 @@ export async function searchLazadaByPuppeteer(keyword: string) {
   try {
     console.log(`🔍 [Search] บอทกำลังค้นหา: "${keyword}"`);
 
-    browser = await puppeteer.launch({
+    // กำหนด options สำหรับ Puppeteer
+    const launchOptions: any = {
       headless: true,
       args: [
         '--no-sandbox',
         '--disable-setuid-sandbox',
         '--disable-dev-shm-usage',
+        '--disable-gpu',
+        '--disable-software-rasterizer',
+        '--single-process',
+        '--no-zygote',
         '--window-size=375,812',
         '--disable-blink-features=AutomationControlled'
       ]
-    });
+    };
+
+    // ถ้าเป็น Production (Render/Serverless) ให้ใช้ Chromium จาก @sparticuz/chromium
+    if (process.env.NODE_ENV === 'production') {
+      launchOptions.executablePath = await chromium.executablePath();
+      launchOptions.args = chromium.args;
+      browser = await puppeteerCore.launch(launchOptions);
+    } else {
+      // Development: ใช้ Puppeteer ปกติ
+      browser = await puppeteer.launch(launchOptions);
+    }
 
     const page = await browser.newPage();
     const iPhone = KnownDevices['iPhone 12 Pro'];
