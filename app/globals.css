@@ -1,0 +1,46 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import "tailwindcss";
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+}
+
+/* Smooth Scroll Behavior */
+html {
+  scroll-behavior: smooth;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+/* 1. สั่งให้ทั้งเว็บใช้ฟอนต์ Noto Sans Thai ผ่านตัวแปรที่เราตั้งไว้ */
+body {
+  font-family: var(--font-noto-sans), sans-serif;
+}
+
+/* 2. เจาะจงบังคับให้ SweetAlert2 ใช้ฟอนต์นี้ด้วย */
+div:where(.swal2-container) .swal2-popup {
+  font-family: var(--font-noto-sans) !important;
+}
+
+/* ปรับแต่งปุ่มใน SweetAlert ให้สวยขึ้น (Optional) */
+div:where(.swal2-container) button.swal2-styled {
+  border-radius: 0.75rem !important;
+  /* ปุ่มโค้งมน */
+  font-weight: 600 !important;
+}
