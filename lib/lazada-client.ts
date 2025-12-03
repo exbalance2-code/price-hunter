@@ -2,7 +2,7 @@ import LazadaAPI from 'lazada-api';
 
 const appKey = '105827';
 const appSecret = 'r8ZMKhPxu1JZUCwTUBVMJiJnZKjhWeQF';
-const accessToken = 'a1bd172c769a4e2c8e78e148a9193181'; // User Token provided
+const accessToken = process.env.LAZADA_ACCESS_TOKEN || 'a1bd172c769a4e2c8e78e148a9193181'; // User Token provided
 
 const client = new LazadaAPI(appKey, appSecret, 'THAILAND', accessToken);
 
