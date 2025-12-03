@@ -69,12 +69,18 @@ export async function POST(req: Request) {
 }
 
 function createBubble(product: any): FlexBubble {
+    // LINE requires HTTPS for images
+    let imageUrl = product.image || 'https://via.placeholder.com/300?text=No+Image';
+    if (!imageUrl.startsWith('https')) {
+        imageUrl = 'https://via.placeholder.com/300?text=No+Image';
+    }
+
     return {
         type: "bubble",
         size: "kilo",
         hero: {
             type: "image",
-            url: product.image || 'https://via.placeholder.com/300',
+            url: imageUrl,
             size: "full",
             aspectRatio: "1:1",
             aspectMode: "cover",
