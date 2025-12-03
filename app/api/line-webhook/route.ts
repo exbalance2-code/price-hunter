@@ -75,6 +75,12 @@ function createBubble(product: any): FlexBubble {
         imageUrl = 'https://via.placeholder.com/300?text=No+Image';
     }
 
+    // Ensure title is not empty and not too long
+    const title = product.title ? product.title.substring(0, 40) + '...' : 'No Title';
+
+    // Ensure price is formatted correctly
+    const priceText = product.price ? `฿${product.price.toLocaleString()}` : '฿0';
+
     return {
         type: "bubble",
         size: "kilo",
@@ -96,7 +102,7 @@ function createBubble(product: any): FlexBubble {
             contents: [
                 {
                     type: "text",
-                    text: product.title.substring(0, 40) + '...',
+                    text: title,
                     weight: "bold",
                     size: "xs",
                     wrap: true,
@@ -108,7 +114,7 @@ function createBubble(product: any): FlexBubble {
                     contents: [
                         {
                             type: "text",
-                            text: `฿${product.price.toLocaleString()}`,
+                            text: priceText,
                             color: "#ff5551",
                             size: "md",
                             weight: "bold",
@@ -116,7 +122,7 @@ function createBubble(product: any): FlexBubble {
                         },
                         {
                             type: "text",
-                            text: product.sold > 0 ? `ขายแล้ว ${formatSold(product.sold)}` : '',
+                            text: product.sold > 0 ? `ขายแล้ว ${formatSold(product.sold)}` : ' ',
                             color: "#aaaaaa",
                             size: "xxs",
                             align: "end",
