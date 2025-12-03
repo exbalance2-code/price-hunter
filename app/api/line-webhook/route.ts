@@ -23,7 +23,7 @@ export async function POST(req: Request) {
                 if (event.replyToken && event.replyToken !== '00000000000000000000000000000000') {
                     await client.replyMessage(event.replyToken, {
                         type: 'text',
-                        text: `🔍 กำลังค้นหาสินค้า "${userMessage}" จาก Google...`
+                        text: `🔍 รอสักครู่กำลังค้นหาสินค้า "${userMessage}"`
                     });
                 }
 
