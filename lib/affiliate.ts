@@ -14,9 +14,23 @@ export async function convertToAffiliateLink(rawUrl: string) {
     if (PASSIO_KEY) {
         try {
             console.log("🔄 กำลังแปลงลิงก์ด้วย Passio...");
-            // ใช้แบบ Dynamic Link ตามเอกสารที่ได้รับมา
+
+            // Clean URL: Remove unnecessary parameters that might confuse the redirect
+            let cleanUrl = rawUrl;
+            try {
+                const urlObj = new URL(rawUrl);
+                // If it's a product page, we might want to strip some tracking params
+                // But generally, just encoding the full URL is safer if it's a valid link.
+                // Let's ensure it starts with https
+                if (!cleanUrl.startsWith('http')) {
+                    cleanUrl = `https://${cleanUrl}`;
+                }
+            } catch (e) {
+                // Ignore
+            }
+
             // Format: https://goeco.mobi/?token={token}&url={url}
-            const encodedUrl = encodeURIComponent(rawUrl);
+            const encodedUrl = encodeURIComponent(cleanUrl);
             const passioLink = `https://goeco.mobi/?token=${PASSIO_KEY}&url=${encodedUrl}`;
 
             console.log("💰 ได้ลิงก์ Passio แล้ว! (Dynamic Link)");
