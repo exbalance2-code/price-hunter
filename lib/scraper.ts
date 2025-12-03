@@ -38,48 +38,6 @@ export async function searchLazadaByPuppeteer(keyword: string) {
     } else {
       // Development: ใช้ Puppeteer ปกติ
       browser = await puppeteer.launch(launchOptions);
-    }
-
-    const page = await browser.newPage();
-    const iPhone = KnownDevices['iPhone 12 Pro'];
-    await page.emulate(iPhone);
-
-    const searchUrl = `https://www.lazada.co.th/catalog/?q=${encodeURIComponent(keyword)}&sort=priceasc`;
-
-    // เปลี่ยนจาก domcontentloaded เป็น networkidle2 เพื่อให้แน่ใจว่าโหลดเสร็จ
-    await page.goto(searchUrl, { waitUntil: 'networkidle2', timeout: 60000 });
-
-    // รอให้หน้าโหลดเสร็จสมบูรณ์ (สำคัญมากสำหรับ Production)
-    await new Promise(resolve => setTimeout(resolve, 3000));
-
-    // ลองหลาย selector เพื่อความแน่ใจ
-    let selectorFound = false;
-    const possibleSelectors = [
-      'div[data-qa-locator="product-item"]',
-      'a[href*="/products/"]',
-      'div.Bm3ON',
-      '[class*="product"]'
-    ];
-
-    for (const selector of possibleSelectors) {
-      try {
-        await page.waitForSelector(selector, { timeout: 5000 });
-        console.log(`✅ พบ Selector: ${selector}`);
-        selectorFound = true;
-        break;
-      } catch (e) {
-        console.log(`⚠️ ไม่พบ Selector: ${selector}`);
-      }
-    }
-
-    if (!selectorFound) {
-      console.log("❌ ไม่พบ Selector ใดๆ เลย - อาจถูก block หรือหน้าเว็บเปลี่ยน");
-    }
-
-    const products = await page.evaluate(() => {
-      // ลอง selector หลายแบบ
-      let items = document.querySelectorAll('div[data-qa-locator="product-item"]');
-
       // ถ้าไม่เจอ ลองหา product links แทน
       if (items.length === 0) {
         console.log('⚠️ ไม่เจอ data-qa-locator, ลองหา product links');
