@@ -4,21 +4,17 @@ const appKey = '105827';
 const appSecret = 'r8ZMKhPxu1JZUCwTUBVMJiJnZKjhWeQF';
 const accessToken = 'a1bd172c769a4e2c8e78e148a9193181'; // User Token provided
 
-const client = new LazadaAPI(appKey, appSecret, 'THAILAND');
+const client = new LazadaAPI(appKey, appSecret, 'THAILAND', accessToken);
 
 export async function searchLazadaByApi(keyword: string) {
     try {
         console.log(`🔍 [API] Searching for: "${keyword}"`);
 
-        // Use the inner client which has the methods
-        const api = (client as any).client;
-
-        // Call getProducts
-        // We pass access_token explicitly just in case
-        const response = await api.getProducts({
+        // Call getProducts directly via the Proxy
+        // The Proxy will inject appKey, appSecret, etc.
+        const response = await (client as any).getProducts({
             filter: 'live',
-            search: keyword,
-            access_token: accessToken
+            search: keyword
         });
 
         console.log('API Response:', JSON.stringify(response, null, 2));
