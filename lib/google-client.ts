@@ -22,29 +22,46 @@ export async function searchLazadaByGoogle(keyword: string) {
         });
 
         if (response.data && response.data.items) {
-            return response.data.items.map((item: any) => {
+            const results = response.data.items.map((item: any) => {
                 // Try to find an image in the pagemap
                 let image = 'https://via.placeholder.com/300?text=No+Image';
                 if (item.pagemap && item.pagemap.cse_image && item.pagemap.cse_image.length > 0) {
                     image = item.pagemap.cse_image[0].src;
                 }
 
-                // Extract price if possible (sometimes in snippet or pagemap)
-                // Google results might not always have price, so we default to 0 or try to parse snippet
+                // Extract price
                 let price = 0;
-                const priceMatch = item.snippet?.match(/฿([0-9,]+)/);
+                // Try to find price in snippet or title
+                const textToSearch = (item.title + " " + item.snippet).toLowerCase();
+                const priceMatch = textToSearch.match(/(?:฿|ราคา|price)\s*[:\s]?\s*([0-9,]+(\.[0-9]+)?)/);
                 if (priceMatch) {
                     price = parseFloat(priceMatch[1].replace(/,/g, ''));
                 }
 
+                // Extract sold count
+                let sold = 0;
+                const soldMatch = textToSearch.match(/ขายแล้ว\s*([0-9,.]+[kK]?)|([0-9,.]+[kK]?)\s*sold/);
+                if (soldMatch) {
+                    let soldStr = soldMatch[1] || soldMatch[2];
+                    soldStr = soldStr.toLowerCase().replace(/,/g, '');
+                    if (soldStr.includes('k')) {
+                        sold = parseFloat(soldStr.replace('k', '')) * 1000;
+                    } else {
+                        sold = parseFloat(soldStr);
+                    }
+                }
+
                 return {
-                    title: item.title.replace(' | Lazada.co.th', '').replace(' - Lazada', ''),
-                    price: price, // Google search might not always give price
+                    title: item.title.replace(' | Lazada.co.th', '').replace(' - Lazada', '').trim(),
+                    price: price,
                     image: image,
                     link: item.link,
-                    sold: 0 // Google doesn't show sold count
+                    sold: sold
                 };
             });
+
+            // Filter out items with no price
+            return results.filter((item: any) => item.price > 0);
         }
 
         return [];
