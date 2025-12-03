@@ -44,23 +44,64 @@ export async function searchLazadaByPuppeteer(keyword: string) {
     const iPhone = KnownDevices['iPhone 12 Pro'];
     await page.emulate(iPhone);
 
-    const searchUrl = `https://www.lazada.co.th/catalog/?q=${encodeURIComponent(keyword)}&sort=priceasc`; // เรียงราคาถูกสุด
+    const searchUrl = `https://www.lazada.co.th/catalog/?q=${encodeURIComponent(keyword)}&sort=priceasc`;
 
-    await page.goto(searchUrl, { waitUntil: 'domcontentloaded', timeout: 60000 });
+    // เปลี่ยนจาก domcontentloaded เป็น networkidle2 เพื่อให้แน่ใจว่าโหลดเสร็จ
+    await page.goto(searchUrl, { waitUntil: 'networkidle2', timeout: 60000 });
 
-    try {
-      await page.waitForSelector('div[data-qa-locator="product-item"]', { timeout: 10000 });
-    } catch (e) {
-      console.log("⚠️ หา Selector ไม่เจอ");
+    // รอให้หน้าโหลดเสร็จสมบูรณ์ (สำคัญมากสำหรับ Production)
+    await page.waitForTimeout(3000);
+
+    // ลองหลาย selector เพื่อความแน่ใจ
+    let selectorFound = false;
+    const possibleSelectors = [
+      'div[data-qa-locator="product-item"]',
+      'a[href*="/products/"]',
+      'div.Bm3ON',
+      '[class*="product"]'
+    ];
+
+    for (const selector of possibleSelectors) {
+      try {
+        await page.waitForSelector(selector, { timeout: 5000 });
+        console.log(`✅ พบ Selector: ${selector}`);
+        selectorFound = true;
+        break;
+      } catch (e) {
+        console.log(`⚠️ ไม่พบ Selector: ${selector}`);
+      }
+    }
+
+    if (!selectorFound) {
+      console.log("❌ ไม่พบ Selector ใดๆ เลย - อาจถูก block หรือหน้าเว็บเปลี่ยน");
     }
 
     const products = await page.evaluate(() => {
-      const items = document.querySelectorAll('div[data-qa-locator="product-item"]');
+      // ลอง selector หลายแบบ
+      let items = document.querySelectorAll('div[data-qa-locator="product-item"]');
+
+      // ถ้าไม่เจอ ลองหา product links แทน
+      if (items.length === 0) {
+        console.log('⚠️ ไม่เจอ data-qa-locator, ลองหา product links');
+        const productLinks = document.querySelectorAll('a[href*="/products/"]');
+        // แปลง NodeList เป็น Array และหา parent ที่เป็น product card
+        const productCards = Array.from(productLinks).map(link => {
+          let parent = link.parentElement;
+          while (parent && !parent.className.includes('Bm3ON') && parent.tagName !== 'BODY') {
+            parent = parent.parentElement;
+          }
+          return parent || link.parentElement;
+        });
+        items = productCards.filter((card, index, self) =>
+          card && self.indexOf(card) === index
+        ) as any;
+      }
+
       const results = [];
 
-      for (let i = 0; i < Math.min(items.length, 10); i++) { // ลองดึงมาเผื่อ 10 อัน แล้วค่อยคัด
+      for (let i = 0; i < Math.min(items.length, 10); i++) {
         const el = items[i];
-        const linkEl = el.querySelector('a');
+        const linkEl = el.querySelector('a[href*="/products/"]') || el.querySelector('a');
         const imgEl = el.querySelector('img');
 
         // หา Title
@@ -69,7 +110,6 @@ export async function searchLazadaByPuppeteer(keyword: string) {
 
         // หาราคา (Mobile Class)
         let price = 0;
-        // Mobile uses 'product-card__price-current' or 'product-card__price'
         const priceEl = el.querySelector('.product-card__price-current') || el.querySelector('.product-card__price') || el.querySelector('span.ooOxS');
         const priceText = priceEl ? priceEl.textContent || '' : el.textContent || '';
 
@@ -80,14 +120,11 @@ export async function searchLazadaByPuppeteer(keyword: string) {
 
         // หาจำนวนที่ขายแล้ว (Mobile Class)
         let soldCount = 0;
-        // Mobile uses 'product-card__itemsold'
         const soldEl = el.querySelector('.product-card__itemsold') || el.querySelector('span._1cEkb');
         if (soldEl) {
           let soldText = soldEl.textContent || '';
-          // Mobile format: "·4.1K ชิ้น" -> Remove "·"
           soldText = soldText.replace(/·/g, '').trim();
 
-          // แปลง "1.2พัน ชิ้น" -> 1200, "500 ชิ้น" -> 500
           let multiplier = 1;
           if (soldText.includes('พัน') || soldText.toLowerCase().includes('k')) multiplier = 1000;
           if (soldText.includes('หมื่น')) multiplier = 10000;
@@ -98,10 +135,9 @@ export async function searchLazadaByPuppeteer(keyword: string) {
           }
         }
 
-        // 🔥 Logic กรองรูปภาพใหม่ (ให้ชัวร์ที่สุด)
+        // Logic กรองรูปภาพ
         let image = '';
         if (imgEl) {
-          // Lazada มักใช้ data-original หรือ data-src สำหรับรูปจริง (Lazy Load)
           const candidates = [
             imgEl.getAttribute('data-original'),
             imgEl.getAttribute('data-src'),
@@ -111,17 +147,14 @@ export async function searchLazadaByPuppeteer(keyword: string) {
           for (let src of candidates) {
             if (!src) continue;
 
-            // กรองรูปที่ไม่ใช่รูปสินค้า
             if (src.includes('base64') || src.includes('.gif') || src.includes('placeholder') || src.includes('assets/')) {
               continue;
             }
 
-            // จัดการ URL
             if (src.startsWith('//')) {
               src = `https:${src}`;
             }
 
-            // ถ้าเป็น URL เต็มรูปแบบแล้ว ให้ใช้เลย
             if (src.startsWith('http')) {
               image = src;
               break;
@@ -129,12 +162,11 @@ export async function searchLazadaByPuppeteer(keyword: string) {
           }
         }
 
-        // ถ้าไม่มีรูป ให้ใช้รูป Placeholder ชัวร์ๆ
         if (!image) {
           image = 'https://placehold.co/400x400.png?text=Product+Image';
         }
 
-        // กรองสินค้า: ต้องมีราคา, มีรูป, และมียอดขาย (เพื่อความน่าเชื่อถือ)
+        // กรองสินค้า: ต้องมีราคา มีรูป และมียอดขาย
         if (title && linkEl && price > 0 && soldCount > 0) {
           let link = linkEl.getAttribute('href') || '';
           if (!link.startsWith('http')) link = `https://www.lazada.co.th${link}`;
@@ -153,7 +185,6 @@ export async function searchLazadaByPuppeteer(keyword: string) {
 
     await browser.close();
 
-    // คัดมา 10 อันแรก (เผื่อไว้ให้ route.ts ไป sort รวมกับ Shopee)
     console.log(`✅ เจอสินค้าทั้งหมด ${products.length} ชิ้น (ส่งกลับ 10)`);
     return products.slice(0, 10);
 
