@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { Client, WebhookEvent, FlexBubble } from '@line/bot-sdk';
-import { searchLazadaByPuppeteer } from '@/lib/scraper';
+import { searchLazadaByApi } from '@/lib/lazada-client';
 import { convertToAffiliateLink } from '@/lib/affiliate';
 
 const lineConfig = {
@@ -28,8 +28,8 @@ export async function POST(req: Request) {
                 }
 
                 // 2. ทำงานเบื้องหลัง
-                // ค้นหาจาก Lazada เท่านั้น
-                const products = await searchLazadaByPuppeteer(userMessage);
+                // ค้นหาจาก Lazada API
+                const products = await searchLazadaByApi(userMessage);
 
                 // เรียงตามราคา (ถูก -> แพง)
                 products.sort((a: any, b: any) => a.price - b.price);
@@ -74,7 +74,7 @@ export async function POST(req: Request) {
 function createBubble(product: any): FlexBubble {
     return {
         type: "bubble",
-        size: "kilo", // ปรับขนาดการ์ดให้เล็กลง (Micro < Kilo < Mega < Giga)
+        size: "kilo",
         hero: {
             type: "image",
             url: product.image || 'https://via.placeholder.com/300',
@@ -95,7 +95,7 @@ function createBubble(product: any): FlexBubble {
                     type: "text",
                     text: product.title.substring(0, 40) + '...',
                     weight: "bold",
-                    size: "xs", // ลดขนาดฟอนต์ชื่อสินค้า
+                    size: "xs",
                     wrap: true,
                     maxLines: 2
                 },
@@ -107,7 +107,7 @@ function createBubble(product: any): FlexBubble {
                             type: "text",
                             text: `฿${product.price.toLocaleString()}`,
                             color: "#ff5551",
-                            size: "md", // ลดขนาดฟอนต์ราคา
+                            size: "md",
                             weight: "bold",
                             flex: 0
                         },
@@ -123,7 +123,7 @@ function createBubble(product: any): FlexBubble {
                     margin: "md"
                 }
             ],
-            paddingAll: "sm" // ลด padding
+            paddingAll: "sm"
         },
         footer: {
             type: "box",
@@ -133,7 +133,7 @@ function createBubble(product: any): FlexBubble {
                     type: "button",
                     style: "primary",
                     color: "#101988",
-                    height: "sm", // ปุ่มเล็กลงสุดได้แค่ sm
+                    height: "sm",
                     action: {
                         type: "uri",
                         label: "ซื้อเลย 👉",
