@@ -1,18 +1,92 @@
-hero: {
-    type: "image",
-        url: product.image || 'https://via.placeholder.com/300',
-            size: "full",
-                aspectRatio: "1:1",
-                    aspectMode: "cover",
-                        action: {
-        type: "uri",
-            label: "View Product",
-                uri: product.link
+import { NextResponse } from 'next/server';
+import { Client, WebhookEvent, FlexBubble } from '@line/bot-sdk';
+import { searchLazadaByGoogle } from '@/lib/google-client';
+import { convertToAffiliateLink } from '@/lib/affiliate';
+
+const lineConfig = {
+    channelAccessToken: process.env.LINE_ACCESS_TOKEN || '',
+    channelSecret: process.env.LINE_CHANNEL_SECRET || '',
+};
+const client = new Client(lineConfig);
+
+export async function POST(req: Request) {
+    try {
+        const body = await req.json();
+        const events: WebhookEvent[] = body.events;
+
+        for (const event of events) {
+            if (event.type === 'message' && event.message.type === 'text') {
+                const userMessage = event.message.text.trim();
+                const userId = event.source.userId;
+
+                // 1. ตอบกลับทันทีว่ากำลังค้นหา
+                if (event.replyToken && event.replyToken !== '00000000000000000000000000000000') {
+                    await client.replyMessage(event.replyToken, {
+                        type: 'text',
+                        text: `🔍 กำลังค้นหาสินค้า "${userMessage}" จาก Google...`
+                    });
+                }
+
+                // 2. ทำงานเบื้องหลัง
+                // ค้นหาจาก Google Custom Search
+                const products = await searchLazadaByGoogle(userMessage);
+
+                // คัดมาแค่ 5 อันดับแรก
+                const bestProducts = products.slice(0, 5);
+
+                if (userId) {
+                    if (bestProducts.length > 0) {
+                        // แปลงลิงก์เป็น Affiliate Link
+                        const productsWithAffiliate = await Promise.all(bestProducts.map(async (p: any) => {
+                            const affiliateLink = await convertToAffiliateLink(p.link);
+                            return { ...p, link: affiliateLink };
+                        }));
+
+                        await client.pushMessage(userId, {
+                            type: 'flex',
+                            altText: `ผลการค้นหา: ${userMessage}`,
+                            contents: {
+                                type: 'carousel',
+                                contents: productsWithAffiliate.map((p: any) => createBubble(p))
+                            }
+                        });
+                    } else {
+                        await client.pushMessage(userId, {
+                            type: 'text',
+                            text: 'ไม่พบสินค้าเลยครับ หรือ Google API Key อาจจะยังไม่ได้ตั้งค่า'
+                        });
+                    }
+                }
+            }
+        }
+
+        return NextResponse.json({ success: true });
+
+    } catch (error) {
+        console.error("Webhook Error:", error);
+        return NextResponse.json({ error: 'Error' }, { status: 500 });
     }
-},
-body: {
-    type: "box",
-        layout: "vertical",
+}
+
+function createBubble(product: any): FlexBubble {
+    return {
+        type: "bubble",
+        size: "kilo",
+        hero: {
+            type: "image",
+            url: product.image || 'https://via.placeholder.com/300',
+            size: "full",
+            aspectRatio: "1:1",
+            aspectMode: "cover",
+            action: {
+                type: "uri",
+                label: "View Product",
+                uri: product.link
+            }
+        },
+        body: {
+            type: "box",
+            layout: "vertical",
             contents: [
                 {
                     type: "text",
@@ -46,11 +120,11 @@ body: {
                     margin: "md"
                 }
             ],
-                paddingAll: "sm"
-},
-footer: {
-    type: "box",
-        layout: "vertical",
+            paddingAll: "sm"
+        },
+        footer: {
+            type: "box",
+            layout: "vertical",
             contents: [
                 {
                     type: "button",
@@ -64,8 +138,8 @@ footer: {
                     }
                 }
             ],
-                paddingAll: "sm"
-}
+            paddingAll: "sm"
+        }
     };
 }
 
