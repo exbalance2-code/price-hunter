@@ -40,24 +40,7 @@ export async function searchLazadaByPuppeteer(keyword: string) {
       browser = await puppeteer.launch(launchOptions);
     }
 
-    const page = await browser.newPage();
-    const iPhone = KnownDevices['iPhone 12 Pro'];
-    await page.emulate(iPhone);
-
-    const searchUrl = `https://www.lazada.co.th/catalog/?q=${encodeURIComponent(keyword)}&sort=priceasc`;
-
-    // เปลี่ยนจาก domcontentloaded เป็น networkidle2 เพื่อให้แน่ใจว่าโหลดเสร็จ
-    await page.goto(searchUrl, { waitUntil: 'networkidle2', timeout: 60000 });
-
-    // รอให้หน้าโหลดเสร็จสมบูรณ์ (สำคัญมากสำหรับ Production)
-    await page.waitForTimeout(3000);
-
-    // ลองหลาย selector เพื่อความแน่ใจ
-    let selectorFound = false;
-    const possibleSelectors = [
-      'div[data-qa-locator="product-item"]',
-      'a[href*="/products/"]',
-      'div.Bm3ON',
+    'div.Bm3ON',
       '[class*="product"]'
     ];
 
