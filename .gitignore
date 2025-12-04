@@ -41,3 +41,8 @@ yarn-error.log*
 next-env.d.ts
 
 /lib/generated/prisma
+
+# Lazada cookies and test files
+lazada_cookies.json
+test-import.js
+test-proxy.js
