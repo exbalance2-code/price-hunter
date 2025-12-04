@@ -370,46 +370,51 @@ export default function Home() {
                 title: "เพิ่มเพื่อน LINE",
                 desc: "แอดไลน์ Price Hunter Bot เป็นเพื่อน",
                 image: "/step1_add_friend.png",
-                color: "blue"
+                gradient: "from-blue-400 to-blue-600",
+                bg: "bg-blue-600"
               },
               {
                 step: "2",
                 title: "พิมพ์คำค้นหา",
                 desc: "พิมพ์ชื่อสินค้าที่ต้องการค้นหา",
                 image: "/step2_search.png",
-                color: "indigo"
+                gradient: "from-indigo-400 to-indigo-600",
+                bg: "bg-indigo-600"
               },
               {
                 step: "3",
                 title: "ดูผลลัพธ์",
                 desc: "เลือกดูสินค้าจากผลลัพธ์ที่แสดง",
                 image: "/step3_results.png",
-                color: "purple"
+                gradient: "from-purple-400 to-purple-600",
+                bg: "bg-purple-600"
               },
               {
                 step: "4",
                 title: "ไปที่แอป",
                 desc: "กดลิงก์เพื่อไปที่แอป Lazada/Shopee",
                 image: "/step4_redirect.png",
-                color: "pink"
+                gradient: "from-pink-400 to-pink-600",
+                bg: "bg-pink-600"
               },
               {
                 step: "5",
                 title: "ช้อปเลย",
                 desc: "สั่งซื้อสินค้าในแอปได้ทันที",
                 image: "/step5_buy.png",
-                color: "rose"
+                gradient: "from-rose-400 to-rose-600",
+                bg: "bg-rose-600"
               }
             ].map((item, index) => (
               <div key={index} className="step-item text-center group">
                 <div className="relative inline-block mb-6">
-                  <div className={`absolute -inset-4 bg-gradient-to-r from-${item.color}-400 to-${item.color}-600 rounded-3xl opacity-20 blur-xl group-hover:opacity-30 transition-opacity duration-300`} />
+                  <div className={`absolute -inset-4 bg-gradient-to-r ${item.gradient} rounded-3xl opacity-20 blur-xl group-hover:opacity-30 transition-opacity duration-300`} />
                   <img
                     src={item.image}
                     alt={item.title}
                     className="relative w-full max-w-[200px] mx-auto rounded-2xl shadow-xl transform group-hover:scale-105 transition-transform duration-300"
                   />
-                  <div className={`absolute -top-4 -right-4 w-10 h-10 bg-${item.color}-600 text-white rounded-full flex items-center justify-center font-bold text-lg shadow-lg border-2 border-white`}>
+                  <div className={`absolute -top-4 -right-4 w-10 h-10 ${item.bg} text-white rounded-full flex items-center justify-center font-bold text-lg shadow-lg border-2 border-white`}>
                     {item.step}
                   </div>
                 </div>
