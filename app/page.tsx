@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Prompt } from 'next/font/google';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -19,6 +19,7 @@ if (typeof window !== 'undefined') {
 export default function Home() {
   const heroRef = useRef<HTMLDivElement>(null);
   const [showScrollTop, setShowScrollTop] = React.useState(false);
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -412,7 +413,8 @@ export default function Home() {
                   <img
                     src={item.image}
                     alt={item.title}
-                    className="relative w-full max-w-[200px] mx-auto rounded-2xl shadow-xl transform group-hover:scale-105 transition-transform duration-300"
+                    className="relative w-full max-w-[200px] mx-auto rounded-2xl shadow-xl transform group-hover:scale-105 transition-transform duration-300 cursor-pointer"
+                    onClick={() => setSelectedImage(item.image)}
                   />
                   <div className={`absolute -top-4 -right-4 w-10 h-10 ${item.bg} text-white rounded-full flex items-center justify-center font-bold text-lg shadow-lg border-2 border-white`}>
                     {item.step}
@@ -519,6 +521,31 @@ export default function Home() {
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M5 10l7-7m0 0l7 7m-7-7v18" />
         </svg>
       </button>
+
+      {/* Image Lightbox Modal */}
+      {selectedImage && (
+        <div
+          className="fixed inset-0 z-[100] bg-black/90 backdrop-blur-sm flex items-center justify-center p-4"
+          onClick={() => setSelectedImage(null)}
+        >
+          <div className="relative max-w-4xl w-full max-h-[90vh] flex items-center justify-center">
+            <button
+              onClick={() => setSelectedImage(null)}
+              className="absolute -top-12 right-0 text-white hover:text-gray-300 transition-colors"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+            <img
+              src={selectedImage}
+              alt="Full size"
+              className="max-w-full max-h-[90vh] object-contain rounded-lg shadow-2xl"
+              onClick={(e) => e.stopPropagation()}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }
