@@ -229,7 +229,7 @@ export default function Home() {
             </div>
 
             <div className="hero-image relative">
-              <div className="relative">
+              <div className="relative bg-gray-100 rounded-2xl p-8">
                 <div className="absolute -inset-4 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-3xl opacity-20 blur-2xl" />
                 <img
                   src="/line-mockup.png"
