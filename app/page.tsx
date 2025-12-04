@@ -42,6 +42,15 @@ export default function Home() {
         duration: 1.2,
         delay: 0.3,
         ease: 'power3.out',
+        onComplete: () => {
+          gsap.to('.hero-image', {
+            y: -20,
+            duration: 3,
+            repeat: -1,
+            yoyo: true,
+            ease: 'power1.inOut',
+          });
+        },
       });
 
       // Service cards animation
@@ -82,6 +91,31 @@ export default function Home() {
         stagger: 0.1,
         ease: 'back.out(1.7)',
       });
+
+      // Steps animation
+      gsap.from('.step-item', {
+        scrollTrigger: {
+          trigger: '.steps-container',
+          start: 'top 75%',
+        },
+        opacity: 0,
+        y: 30,
+        duration: 0.8,
+        stagger: 0.2,
+        ease: 'power2.out',
+      });
+
+      // CTA animation
+      gsap.from('.cta-content', {
+        scrollTrigger: {
+          trigger: '.cta-section',
+          start: 'top 75%',
+        },
+        opacity: 0,
+        scale: 0.9,
+        duration: 0.8,
+        ease: 'back.out(1.7)',
+      });
     }, heroRef);
 
     return () => {
@@ -91,7 +125,7 @@ export default function Home() {
   }, []);
 
   return (
-    <div className={`min-h-screen bg-white ${prompt.className}`} ref={heroRef}>
+    <div className="min-h-screen bg-white text-gray-900 font-sans" ref={heroRef}>
       {/* Navbar */}
       <nav className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-sm border-b border-gray-200 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -102,20 +136,20 @@ export default function Home() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                 </svg>
               </div>
-              <span className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent">
-                Price Hunter
+              <span className="text-xl font-bold bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent">
+                Price Hunter Bot
               </span>
             </div>
 
             <div className="hidden md:flex items-center gap-8">
-              <a href="#services" className="text-gray-700 hover:text-blue-600 font-medium transition-colors">บริการ</a>
-              <a href="#features" className="text-gray-700 hover:text-blue-600 font-medium transition-colors">จุดเด่น</a>
-              <a href="#demo" className="text-gray-700 hover:text-blue-600 font-medium transition-colors">วิธีใช้งาน</a>
+              <a href="#services" className="text-sm text-gray-700 hover:text-blue-600 font-medium transition-colors">บริการ</a>
+              <a href="#features" className="text-sm text-gray-700 hover:text-blue-600 font-medium transition-colors">จุดเด่น</a>
+              <a href="#demo" className="text-sm text-gray-700 hover:text-blue-600 font-medium transition-colors">วิธีใช้งาน</a>
               <a
                 href="https://lin.ee/8VZY6eI"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="px-6 py-2.5 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg font-semibold hover:shadow-lg hover:shadow-blue-500/30 transition-all duration-300 transform hover:-translate-y-0.5"
+                className="px-6 py-2.5 bg-gradient-to-r from-blue-600 to-blue-700 text-white text-sm rounded-lg font-semibold hover:shadow-lg hover:shadow-blue-500/30 transition-all duration-300 transform hover:-translate-y-0.5"
               >
                 เริ่มใช้งาน
               </a>
@@ -139,22 +173,22 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div className="hero-content">
-              <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-100 rounded-full mb-6">
+              <div className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-100 rounded-full mb-6">
                 <span className="relative flex h-2.5 w-2.5">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-500 opacity-75" />
-                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-blue-600" />
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-500 opacity-75" />
+                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-600" />
                 </span>
-                <span className="text-blue-700 font-semibold text-sm">ใช้งานได้ทันที ฟรี!</span>
+                <span className="text-emerald-700 font-semibold text-xs">ใช้งานได้ทันที ฟรี!</span>
               </div>
 
-              <h1 className="text-5xl lg:text-6xl font-bold text-gray-900 mb-6 leading-tight">
+              <h1 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-6 leading-tight">
                 ผู้ช่วยค้นหาสินค้า<br />
                 <span className="bg-gradient-to-r from-blue-600 via-blue-700 to-purple-600 bg-clip-text text-transparent">
                   ราคาดีที่สุด
                 </span>
               </h1>
 
-              <p className="text-xl text-gray-600 mb-8 leading-relaxed">
+              <p className="text-base text-gray-600 mb-8 leading-relaxed">
                 ค้นหาสินค้าจาก Lazada ได้ทันที เปรียบเทียบราคา คัดกรองร้านค้าที่เชื่อถือได้
                 ส่งผลลัพธ์ตรงถึง LINE ของคุณภายใน 3 วินาที
               </p>
@@ -164,13 +198,13 @@ export default function Home() {
                   href="https://lin.ee/8VZY6eI"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="px-8 py-4 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl font-bold text-lg shadow-xl shadow-blue-600/30 hover:shadow-2xl hover:shadow-blue-600/40 transition-all duration-300 transform hover:-translate-y-1 text-center"
+                  className="px-8 py-4 bg-[#06C755] hover:bg-[#05b34c] text-white rounded-xl font-bold text-base shadow-xl shadow-green-600/30 hover:shadow-2xl hover:shadow-green-600/40 transition-all duration-300 transform hover:-translate-y-1 text-center"
                 >
                   เพิ่มเพื่อน LINE ฟรี
                 </a>
                 <a
                   href="#demo"
-                  className="px-8 py-4 bg-white text-gray-700 border-2 border-gray-300 rounded-xl font-bold text-lg hover:border-blue-600 hover:text-blue-600 transition-all duration-300 text-center"
+                  className="px-8 py-4 bg-white text-gray-700 border-2 border-gray-300 rounded-xl font-bold text-base hover:border-blue-600 hover:text-blue-600 transition-all duration-300 text-center"
                 >
                   ดูตัวอย่างการใช้งาน
                 </a>
@@ -179,23 +213,23 @@ export default function Home() {
               {/* Stats */}
               <div className="stats-section grid grid-cols-3 gap-6 mt-12 pt-8 border-t border-gray-200">
                 <div className="stat-item text-center">
-                  <div className="text-3xl font-bold text-blue-600">3 วิ</div>
-                  <div className="text-sm text-gray-600 mt-1">ความเร็วตอบกลับ</div>
+                  <div className="text-2xl font-bold text-blue-600">3 วิ</div>
+                  <div className="text-xs text-gray-600 mt-1">ความเร็วตอบกลับ</div>
                 </div>
                 <div className="stat-item text-center">
-                  <div className="text-3xl font-bold text-blue-600">100%</div>
-                  <div className="text-sm text-gray-600 mt-1">ฟรี ไม่มีค่าใช้จ่าย</div>
+                  <div className="text-2xl font-bold text-blue-600">100%</div>
+                  <div className="text-xs text-gray-600 mt-1">ฟรี ไม่มีค่าใช้จ่าย</div>
                 </div>
                 <div className="stat-item text-center">
-                  <div className="text-3xl font-bold text-blue-600">24/7</div>
-                  <div className="text-sm text-gray-600 mt-1">พร้อมให้บริการ</div>
+                  <div className="text-2xl font-bold text-blue-600">24/7</div>
+                  <div className="text-xs text-gray-600 mt-1">พร้อมให้บริการ</div>
                 </div>
               </div>
             </div>
 
             <div className="hero-image relative">
               <div className="relative">
-                <div className="absolute -inset-4 bg-gradient-to-r from-blue-600 to-purple-600 rounded-3xl opacity-20 blur-2xl" />
+                <div className="absolute -inset-4 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-3xl opacity-20 blur-2xl" />
                 <img
                   src="/line-mockup.png"
                   alt="Price Hunter LINE Bot Demo"
@@ -211,8 +245,8 @@ export default function Home() {
       <section id="services" className="services-section py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">บริการของเรา</h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">บริการของเรา</h2>
+            <p className="text-base text-gray-600 max-w-3xl mx-auto">
               ระบบอัจฉริยะที่ออกแบบมาเพื่อช่วยให้คุณช้อปปิ้งได้อย่างมั่นใจ
             </p>
           </div>
@@ -264,8 +298,8 @@ export default function Home() {
                     {service.icon}
                   </div>
 
-                  <h3 className="text-xl font-bold text-gray-900 mb-3">{service.title}</h3>
-                  <p className="text-gray-600 leading-relaxed">{service.desc}</p>
+                  <h3 className="text-base font-bold text-gray-900 mb-3">{service.title}</h3>
+                  <p className="text-xs text-gray-600 leading-relaxed">{service.desc}</p>
                 </div>
               </div>
             ))}
@@ -277,8 +311,8 @@ export default function Home() {
       <section id="features" className="features-section py-20 bg-gradient-to-br from-gray-50 to-blue-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">จุดเด่นของ Price Hunter</h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">จุดเด่นของ Price Hunter Bot</h2>
+            <p className="text-base text-gray-600 max-w-3xl mx-auto">
               เทคโนโลยีที่ทันสมัย ออกแบบมาเพื่อประสบการณ์ที่ดีที่สุด
             </p>
           </div>
@@ -307,13 +341,13 @@ export default function Home() {
               <div key={index} className="feature-card">
                 <div className="relative p-8 bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 h-full border border-gray-100">
                   <div className="flex items-center gap-4 mb-6">
-                    <div className="text-5xl font-bold text-blue-100">{feature.number}</div>
+                    <div className="text-4xl font-bold text-blue-100">{feature.number}</div>
                     <div className="w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center text-white">
                       {feature.icon}
                     </div>
                   </div>
-                  <h3 className="text-2xl font-bold text-gray-900 mb-4">{feature.title}</h3>
-                  <p className="text-gray-600 leading-relaxed">{feature.desc}</p>
+                  <h3 className="text-lg font-bold text-gray-900 mb-4">{feature.title}</h3>
+                  <p className="text-xs text-gray-600 leading-relaxed">{feature.desc}</p>
                 </div>
               </div>
             ))}
@@ -325,69 +359,89 @@ export default function Home() {
       <section id="demo" className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">วิธีใช้งาน</h2>
-            <p className="text-xl text-gray-600">ง่ายเพียง 2 ขั้นตอน</p>
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">วิธีใช้งาน</h2>
+            <p className="text-base text-gray-600">ง่ายเพียง 5 ขั้นตอน</p>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-12 items-center max-w-5xl mx-auto">
-            <div className="text-center">
-              <div className="relative inline-block">
-                <div className="absolute -inset-4 bg-gradient-to-r from-blue-600 to-purple-600 rounded-3xl opacity-20 blur-xl" />
-                <img
-                  src="/mockup-step1.png"
-                  alt="ขั้นตอนที่ 1"
-                  className="relative w-full max-w-sm mx-auto rounded-2xl shadow-2xl"
-                />
-              </div>
-              <div className="mt-8">
-                <div className="inline-flex items-center justify-center w-12 h-12 bg-blue-600 text-white rounded-full font-bold text-xl mb-4">
-                  1
+          <div className="steps-container grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-8 items-start max-w-7xl mx-auto">
+            {[
+              {
+                step: "1",
+                title: "เพิ่มเพื่อน LINE",
+                desc: "แอดไลน์ Price Hunter Bot เป็นเพื่อน",
+                image: "/step1_add_friend.png",
+                color: "blue"
+              },
+              {
+                step: "2",
+                title: "พิมพ์คำค้นหา",
+                desc: "พิมพ์ชื่อสินค้าที่ต้องการค้นหา",
+                image: "/step2_search.png",
+                color: "indigo"
+              },
+              {
+                step: "3",
+                title: "ดูผลลัพธ์",
+                desc: "เลือกดูสินค้าจากผลลัพธ์ที่แสดง",
+                image: "/step3_results.png",
+                color: "purple"
+              },
+              {
+                step: "4",
+                title: "ไปที่แอป",
+                desc: "กดลิงก์เพื่อไปที่แอป Lazada/Shopee",
+                image: "/step4_redirect.png",
+                color: "pink"
+              },
+              {
+                step: "5",
+                title: "ช้อปเลย",
+                desc: "สั่งซื้อสินค้าในแอปได้ทันที",
+                image: "/step5_buy.png",
+                color: "rose"
+              }
+            ].map((item, index) => (
+              <div key={index} className="step-item text-center group">
+                <div className="relative inline-block mb-6">
+                  <div className={`absolute -inset-4 bg-gradient-to-r from-${item.color}-400 to-${item.color}-600 rounded-3xl opacity-20 blur-xl group-hover:opacity-30 transition-opacity duration-300`} />
+                  <img
+                    src={item.image}
+                    alt={item.title}
+                    className="relative w-full max-w-[200px] mx-auto rounded-2xl shadow-xl transform group-hover:scale-105 transition-transform duration-300"
+                  />
+                  <div className={`absolute -top-4 -right-4 w-10 h-10 bg-${item.color}-600 text-white rounded-full flex items-center justify-center font-bold text-lg shadow-lg border-2 border-white`}>
+                    {item.step}
+                  </div>
                 </div>
-                <h3 className="text-2xl font-bold text-gray-900 mb-3">พิมพ์ชื่อสินค้า</h3>
-                <p className="text-gray-600">ส่งข้อความบอกชื่อสินค้าที่ต้องการค้นหา</p>
-              </div>
-            </div>
-
-            <div className="text-center">
-              <div className="relative inline-block">
-                <div className="absolute -inset-4 bg-gradient-to-r from-green-600 to-blue-600 rounded-3xl opacity-20 blur-xl" />
-                <img
-                  src="/mockup-step2.png"
-                  alt="ขั้นตอนที่ 2"
-                  className="relative w-full max-w-sm mx-auto rounded-2xl shadow-2xl"
-                />
-              </div>
-              <div className="mt-8">
-                <div className="inline-flex items-center justify-center w-12 h-12 bg-green-600 text-white rounded-full font-bold text-xl mb-4">
-                  2
+                <div>
+                  <h3 className="text-lg font-bold text-gray-900 mb-2">{item.title}</h3>
+                  <p className="text-xs text-gray-600 leading-relaxed px-2">{item.desc}</p>
                 </div>
-                <h3 className="text-2xl font-bold text-gray-900 mb-3">รับผลลัพธ์</h3>
-                <p className="text-gray-600">ได้รับรายการสินค้าพร้อมราคาภายใน 3 วินาที</p>
               </div>
-            </div>
+            ))}
           </div>
         </div>
       </section>
 
       {/* CTA Section */}
-      <section className="py-24 bg-gradient-to-br from-blue-600 via-blue-700 to-purple-700 text-white relative overflow-hidden">
+      <section className="cta-section py-24 bg-gradient-to-br from-blue-600 via-blue-700 to-purple-700 text-white relative overflow-hidden">
         <div className="absolute inset-0 bg-grid-pattern opacity-10" />
         <div className="absolute top-0 right-0 w-96 h-96 bg-white/10 rounded-full blur-3xl" />
         <div className="absolute bottom-0 left-0 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl" />
 
-        <div className="max-w-4xl mx-auto px-4 text-center relative z-10">
-          <h2 className="text-4xl md:text-5xl font-bold mb-6">
+        <div className="cta-content max-w-4xl mx-auto px-4 text-center relative z-10">
+          <h2 className="text-2xl md:text-3xl font-bold mb-6">
             พร้อมเริ่มประหยัดเงินแล้วหรือยัง?
           </h2>
-          <p className="text-xl text-blue-100 mb-10 leading-relaxed">
-            เพิ่มเพื่อน Price Hunter วันนี้ เริ่มค้นหาสินค้าราคาดีได้ทันที<br />
+          <p className="text-base text-blue-100 mb-10 leading-relaxed">
+            เพิ่มเพื่อน Price Hunter Bot วันนี้ เริ่มค้นหาสินค้าราคาดีได้ทันที<br />
             ฟรี ไม่มีค่าใช้จ่าย ไม่ต้องลงทะเบียน
           </p>
           <a
             href="https://lin.ee/8VZY6eI"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-block px-10 py-5 bg-white text-blue-700 rounded-xl font-bold text-xl shadow-2xl hover:shadow-3xl hover:bg-gray-50 transition-all duration-300 transform hover:-translate-y-1"
+            className="inline-block px-8 py-4 bg-white text-blue-700 rounded-xl font-bold text-base shadow-2xl hover:shadow-3xl hover:bg-gray-50 transition-all duration-300 transform hover:-translate-y-1"
           >
             เพิ่มเพื่อน LINE ตอนนี้เลย
           </a>
@@ -405,29 +459,29 @@ export default function Home() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                   </svg>
                 </div>
-                <span className="text-2xl font-bold">Price Hunter</span>
+                <span className="text-xl font-bold">Price Hunter Bot</span>
               </div>
-              <p className="text-gray-400 leading-relaxed max-w-md">
+              <p className="text-sm text-gray-400 leading-relaxed max-w-md">
                 ผู้ช่วยค้นหาสินค้าอัจฉริยะที่จะช่วยให้คุณช้อปปิ้งได้อย่างฉลาด ประหยัด และปลอดภัย
               </p>
             </div>
 
             <div>
-              <h3 className="font-bold text-lg mb-4">ลิงก์ด่วน</h3>
+              <h3 className="font-bold text-base mb-4">ลิงก์ด่วน</h3>
               <ul className="space-y-2">
-                <li><a href="#services" className="text-gray-400 hover:text-white transition-colors">บริการ</a></li>
-                <li><a href="#features" className="text-gray-400 hover:text-white transition-colors">จุดเด่น</a></li>
-                <li><a href="#demo" className="text-gray-400 hover:text-white transition-colors">วิธีใช้งาน</a></li>
+                <li><a href="#services" className="text-sm text-gray-400 hover:text-white transition-colors">บริการ</a></li>
+                <li><a href="#features" className="text-sm text-gray-400 hover:text-white transition-colors">จุดเด่น</a></li>
+                <li><a href="#demo" className="text-sm text-gray-400 hover:text-white transition-colors">วิธีใช้งาน</a></li>
               </ul>
             </div>
 
             <div>
-              <h3 className="font-bold text-lg mb-4">ติดตามเรา</h3>
+              <h3 className="font-bold text-base mb-4">ติดตามเรา</h3>
               <a
                 href="https://www.facebook.com/profile.php?id=61584449372366"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 text-gray-400 hover:text-white transition-colors"
+                className="inline-flex items-center gap-2 text-sm text-gray-400 hover:text-white transition-colors"
               >
                 <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
@@ -438,12 +492,12 @@ export default function Home() {
           </div>
 
           <div className="border-t border-gray-800 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
-            <p className="text-gray-400 text-sm">
-              © {new Date().getFullYear()} Price Hunter. All rights reserved. | v2.0.0
+            <p className="text-gray-400 text-xs">
+              © {new Date().getFullYear()} Price Hunter Bot. All rights reserved. | v2.0.0
             </p>
-            <div className="flex gap-6 text-sm text-gray-400">
-              <a href="#" className="hover:text-white transition-colors">นโยบายความเป็นส่วนตัว</a>
-              <a href="#" className="hover:text-white transition-colors">เงื่อนไขการใช้งาน</a>
+            <div className="flex gap-6 text-xs text-gray-400">
+              <a href="/privacy-policy" className="hover:text-white transition-colors">นโยบายความเป็นส่วนตัว</a>
+              <a href="/terms" className="hover:text-white transition-colors">เงื่อนไขการใช้งาน</a>
             </div>
           </div>
         </div>

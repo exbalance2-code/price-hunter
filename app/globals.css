@@ -17,8 +17,8 @@ html {
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-prompt);
+  --font-mono: monospace;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -28,14 +28,29 @@ html {
   }
 }
 
-/* 1. สั่งให้ทั้งเว็บใช้ฟอนต์ Noto Sans Thai ผ่านตัวแปรที่เราตั้งไว้ */
+/* 1. สั่งให้ทั้งเว็บใช้ฟอนต์ Prompt ผ่านตัวแปรที่เราตั้งไว้ */
 body {
-  font-family: var(--font-noto-sans), sans-serif;
+  font-family: var(--font-prompt), sans-serif;
 }
 
-/* 2. เจาะจงบังคับให้ SweetAlert2 ใช้ฟอนต์นี้ด้วย */
+/* 2. บังคับให้ Headings ทุกระดับใช้ฟอนต์นี้ */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-prompt), sans-serif;
+}
+
+/* 3. บังคับให้ Tailwind Typography (prose) ใช้ฟอนต์นี้ */
+.prose :where(h1, h2, h3, h4, h5, h6, p, li, a, span, div) {
+  font-family: var(--font-prompt), sans-serif !important;
+}
+
+/* 4. เจาะจงบังคับให้ SweetAlert2 ใช้ฟอนต์นี้ด้วย */
 div:where(.swal2-container) .swal2-popup {
-  font-family: var(--font-noto-sans) !important;
+  font-family: var(--font-prompt) !important;
 }
 
 /* ปรับแต่งปุ่มใน SweetAlert ให้สวยขึ้น (Optional) */

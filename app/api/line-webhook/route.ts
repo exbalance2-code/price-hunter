@@ -53,7 +53,7 @@ export async function POST(req: Request) {
                     } else {
                         await client.pushMessage(userId, {
                             type: 'text',
-                            text: 'ไม่พบสินค้าเลยครับ หรือ Google API Key อาจจะยังไม่ได้ตั้งค่า'
+                            text: 'ไม่พบสินค้าเลยครับ ลองค้นหาอีกครั้ง'
                         });
                     }
                 }
