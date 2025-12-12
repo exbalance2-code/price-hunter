@@ -36,7 +36,7 @@ export async function getTopSearches(limit: number = 10) {
        GROUP BY search_query 
        ORDER BY count DESC 
        LIMIT ?`,
-            [String(limit)]
+            [limit]
         );
         return rows;
     } catch (error) {
@@ -53,7 +53,7 @@ export async function getTopClicks(limit: number = 10) {
        GROUP BY product_name, product_price, platform 
        ORDER BY click_count DESC 
        LIMIT ?`,
-            [String(limit)]
+            [limit]
         );
         return rows;
     } catch (error) {
@@ -150,7 +150,7 @@ export async function getTrendingProducts(limit: number = 10) {
       GROUP BY product_name, product_price, platform
       ORDER BY click_count DESC
       LIMIT ?`,
-            [String(limit)]
+            [limit]
         );
         return rows;
     } catch (error) {
