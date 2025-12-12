@@ -23,6 +23,7 @@
     "lazada-api": "^2.6.0",
     "mysql2": "^3.15.3",
     "next": "16.0.5",
+    "prisma": "^5.22.0",
     "puppeteer": "^24.31.0",
     "puppeteer-core": "^24.31.0",
     "puppeteer-extra": "^3.3.6",
@@ -36,7 +37,7 @@
   "devDependencies": {
     "eslint": "^9",
     "eslint-config-next": "16.0.5",
-    "prisma": "^5.22.0",
-    "typescript": "^5"
+    "eslint-config-next": "16.0.5",
+    "typescript": "^5""typescript": "^5"
   }
 }
