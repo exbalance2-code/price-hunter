@@ -149,8 +149,8 @@ export async function getTrendingProducts(limit: number = 10) {
       WHERE created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)
       GROUP BY product_name, product_price, platform
       ORDER BY click_count DESC
-      LIMIT ?`,
-            [limit]
+      LIMIT ${Number(limit)}`,
+            []
         );
         return rows;
     } catch (error) {
