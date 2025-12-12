@@ -31,7 +31,7 @@ async function getLineClient() {
 
     // 2. Fallback ไปที่ .env
     const lineConfig = {
-        channelAccessToken: token || process.env.LINE_CHANNEL_ACCESS_TOKEN || '',
+        channelAccessToken: token || process.env.LINE_CHANNEL_ACCESS_TOKEN || process.env.LINE_ACCESS_TOKEN || '',
         channelSecret: secret || process.env.LINE_CHANNEL_SECRET || '',
     };
 
