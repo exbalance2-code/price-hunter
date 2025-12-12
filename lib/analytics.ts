@@ -1,15 +1,5 @@
-import mysql from 'mysql2/promise';
-
-// Create connection pool
-const pool = mysql.createPool({
-    host: 'localhost',
-    user: 'root',
-    password: '',
-    database: 'price_hunter',
-    waitForConnections: true,
-    connectionLimit: 10,
-    queueLimit: 0
-});
+import pool from './db';
+// Pool imported from lib/db.ts
 
 export async function logSearch(searchQuery: string, resultsCount: number) {
     try {
