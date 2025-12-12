@@ -37,7 +37,6 @@
   "devDependencies": {
     "eslint": "^9",
     "eslint-config-next": "16.0.5",
-    "eslint-config-next": "16.0.5",
-    "typescript": "^5""typescript": "^5"
+    "typescript": "^5"
   }
 }
