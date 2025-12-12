@@ -35,8 +35,8 @@ export async function getTopSearches(limit: number = 10) {
        FROM search_logs 
        GROUP BY search_query 
        ORDER BY count DESC 
-       LIMIT ?`,
-            [limit]
+       LIMIT ${Number(limit)}`,
+            []
         );
         return rows;
     } catch (error) {
@@ -52,8 +52,8 @@ export async function getTopClicks(limit: number = 10) {
        FROM click_logs 
        GROUP BY product_name, product_price, platform 
        ORDER BY click_count DESC 
-       LIMIT ?`,
-            [limit]
+       LIMIT ${Number(limit)}`,
+            []
         );
         return rows;
     } catch (error) {
