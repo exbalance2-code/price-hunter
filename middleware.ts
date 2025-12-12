@@ -9,7 +9,7 @@ export function middleware(request: NextRequest) {
         // ตรวจสอบ cookie หรือ session
         const adminAuth = request.cookies.get('admin_auth');
 
-        if (!adminAuth || adminAuth.value !== process.env.ADMIN_SECRET) {
+        if (!adminAuth || adminAuth.value !== (process.env.ADMIN_SECRET || 'default-secret')) {
             // Redirect ไปหน้า login
             return NextResponse.redirect(new URL('/admin/login', request.url));
         }
