@@ -45,7 +45,13 @@ async function getLineClient() {
 export async function POST(req: Request) {
     try {
         const body = await req.json();
-        const events: WebhookEvent[] = body.events;
+        const events: WebhookEvent[] = body.events || [];
+
+        // Handle Webhook Verification (Empty events)
+        if (events.length === 0) {
+            return NextResponse.json({ success: true });
+        }
+
         const client = await getLineClient();
 
         for (const event of events) {
