@@ -7,8 +7,8 @@ const dbUrl = process.env.DATABASE_URL
 // สร้าง Connection Pool
 const pool = mysql.createPool({
     host: dbUrl ? dbUrl.hostname : process.env.MYSQL_HOST,
-    user: dbUrl ? dbUrl.username : process.env.MYSQL_USER,
-    password: dbUrl ? dbUrl.password : process.env.MYSQL_PASSWORD,
+    user: dbUrl ? decodeURIComponent(dbUrl.username) : process.env.MYSQL_USER,
+    password: dbUrl ? decodeURIComponent(dbUrl.password) : process.env.MYSQL_PASSWORD,
     database: dbUrl ? dbUrl.pathname.substring(1) : process.env.MYSQL_DATABASE, // remove leading slash
     port: dbUrl ? Number(dbUrl.port) : (Number(process.env.MYSQL_PORT) || 3306),
     ssl: { rejectUnauthorized: false }, // Required for TiDB/Cloud SQL
