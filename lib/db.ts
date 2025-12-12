@@ -1,12 +1,17 @@
 import mysql from 'mysql2/promise';
 
+const dbUrl = process.env.DATABASE_URL
+    ? new URL(process.env.DATABASE_URL)
+    : null;
+
 // สร้าง Connection Pool
 const pool = mysql.createPool({
-    host: process.env.MYSQL_HOST,
-    user: process.env.MYSQL_USER,
-    password: process.env.MYSQL_PASSWORD,
-    database: process.env.MYSQL_DATABASE,
-    port: Number(process.env.MYSQL_PORT) || 3306,
+    host: dbUrl ? dbUrl.hostname : process.env.MYSQL_HOST,
+    user: dbUrl ? dbUrl.username : process.env.MYSQL_USER,
+    password: dbUrl ? dbUrl.password : process.env.MYSQL_PASSWORD,
+    database: dbUrl ? dbUrl.pathname.substring(1) : process.env.MYSQL_DATABASE, // remove leading slash
+    port: dbUrl ? Number(dbUrl.port) : (Number(process.env.MYSQL_PORT) || 3306),
+    ssl: { rejectUnauthorized: false }, // Required for TiDB/Cloud SQL
     waitForConnections: true,
     connectionLimit: 10,
     queueLimit: 0,
