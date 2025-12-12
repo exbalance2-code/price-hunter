@@ -39,3 +39,44 @@ enum Platform {
   shopee
   lazada
 }
+
+model SystemSettings {
+  id           Int      @id @default(autoincrement())
+  settingKey   String   @unique @map("setting_key") @db.VarChar(100)
+  settingValue String   @map("setting_value") @db.Text
+  isEncrypted  Boolean  @default(true) @map("is_encrypted")
+  updatedBy    String?  @map("updated_by") @db.VarChar(50)
+  updatedAt    DateTime @default(now()) @updatedAt @map("updated_at")
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  @@map("system_settings")
+  @@index([settingKey])
+}
+
+model AuditLog {
+  id         Int      @id @default(autoincrement())
+  action     String   @db.VarChar(50)
+  settingKey String?  @map("setting_key") @db.VarChar(100)
+  oldValue   String?  @map("old_value") @db.Text
+  newValue   String?  @map("new_value") @db.Text
+  changedBy  String   @map("changed_by") @db.VarChar(50)
+  ipAddress  String?  @map("ip_address") @db.VarChar(45)
+  userAgent  String?  @map("user_agent") @db.Text
+  changedAt  DateTime @default(now()) @map("changed_at")
+
+  @@map("audit_logs")
+  @@index([changedAt])
+  @@index([settingKey])
+}
+
+model AdminUser {
+  id           Int      @id @default(autoincrement())
+  username     String   @unique @db.VarChar(50)
+  passwordHash String   @map("password_hash") @db.VarChar(255)
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @default(now()) @updatedAt @map("updated_at")
+  lastLogin    DateTime? @map("last_login")
+
+  @@map("admin_users")
+  @@index([username])
+}
