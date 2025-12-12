@@ -13,6 +13,10 @@ export interface LazadaProduct {
 }
 
 export async function searchLazadaProducts(keyword: string, limit: number = 5): Promise<LazadaProduct[]> {
+    // TEMPORARILY DISABLED (User Request)
+    return [];
+
+    /*
     try {
         // 1. Try Passio First
         console.log(`[Lazada] Searching via Passio for: ${keyword}`);
@@ -55,4 +59,5 @@ export async function searchLazadaProducts(keyword: string, limit: number = 5): 
     }
 
     return [];
+    */
 }
