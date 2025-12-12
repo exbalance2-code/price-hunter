@@ -58,7 +58,7 @@ export async function searchPassioProducts(keyword: string, limit: number = 5): 
         // Doc: GET https://ga.passio.eco/api/v3/products?token={token}&keyword={keyword}&limit={limit}
         const response = await axios.get(`${baseUrl}/products`, {
             params: {
-                token: token,
+                token: token.trim(),
                 limit: 50,
                 country_code: 'TH',
                 // Try forcing advertiser_id for Lazada TH
