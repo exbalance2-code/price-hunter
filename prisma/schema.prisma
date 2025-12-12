@@ -1,0 +1,41 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model SearchLog {
+  id           Int      @id @default(autoincrement())
+  searchQuery  String   @map("search_query") @db.VarChar(255)
+  resultsCount Int      @map("results_count")
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  @@map("search_logs")
+  @@index([searchQuery])
+  @@index([createdAt])
+}
+
+model ClickLog {
+  id           Int      @id @default(autoincrement())
+  productName  String   @map("product_name") @db.VarChar(500)
+  productPrice Decimal  @map("product_price") @db.Decimal(10, 2)
+  platform     Platform
+  searchQuery  String   @map("search_query") @db.VarChar(255)
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  @@map("click_logs")
+  @@index([platform])
+  @@index([searchQuery])
+  @@index([createdAt])
+}
+
+enum Platform {
+  shopee
+  lazada
+}

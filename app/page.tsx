@@ -146,6 +146,9 @@ export default function Home() {
               <a href="#services" className="text-sm text-gray-700 hover:text-blue-600 font-medium transition-colors">บริการ</a>
               <a href="#features" className="text-sm text-gray-700 hover:text-blue-600 font-medium transition-colors">จุดเด่น</a>
               <a href="#demo" className="text-sm text-gray-700 hover:text-blue-600 font-medium transition-colors">วิธีใช้งาน</a>
+              <a href="/trending" className="text-sm text-gray-700 hover:text-blue-600 font-medium transition-colors flex items-center gap-1">
+                🔥 สินค้ายอดนิยม
+              </a>
               <a
                 href="https://lin.ee/8VZY6eI"
                 target="_blank"
@@ -479,6 +482,7 @@ export default function Home() {
                 <li><a href="#services" className="text-sm text-gray-400 hover:text-white transition-colors">บริการ</a></li>
                 <li><a href="#features" className="text-sm text-gray-400 hover:text-white transition-colors">จุดเด่น</a></li>
                 <li><a href="#demo" className="text-sm text-gray-400 hover:text-white transition-colors">วิธีใช้งาน</a></li>
+                <li><a href="/trending" className="text-sm text-gray-400 hover:text-white transition-colors">🔥 สินค้ายอดนิยม</a></li>
               </ul>
             </div>
 

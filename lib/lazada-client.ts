@@ -1,40 +1,58 @@
-import LazadaAPI from 'lazada-api';
+import { searchPassioProducts } from './passio-client';
+import { searchAccessTradeProducts } from './accesstrade-client';
 
-const appKey = '105827';
-const appSecret = 'r8ZMKhPxu1JZUCwTUBVMJiJnZKjhWeQF';
-const accessToken = process.env.LAZADA_ACCESS_TOKEN || 'ec72bdd5c0884df6b56fec894335e11c'; // User Token provided
+export interface LazadaProduct {
+    itemId: string;
+    name: string;
+    price: number;
+    imageUrl: string;
+    productLink: string;
+    salePrice?: number;
+    discount?: string;
+    sold?: number;
+}
 
-const client = new LazadaAPI(appKey, appSecret, 'THAILAND', accessToken);
-
-export async function searchLazadaByApi(keyword: string) {
+export async function searchLazadaProducts(keyword: string, limit: number = 5): Promise<LazadaProduct[]> {
     try {
-        console.log(`🔍 [API] Searching for: "${keyword}"`);
+        // 1. Try Passio First
+        console.log(`[Lazada] Searching via Passio for: ${keyword}`);
+        const passioItems = await searchPassioProducts(keyword, 50);
+        const lazadaItems = passioItems.filter(p => p.platform === 'lazada');
 
-        // Call getProducts directly via the Proxy
-        // The Proxy will inject appKey, appSecret, etc.
-        const response = await (client as any).getProducts({
-            filter: 'live',
-            search: keyword
-        });
-
-        console.log('API Response:', JSON.stringify(response, null, 2));
-
-        // Parse response
-        // Response structure from this SDK usually is { data: { products: [...] } } or similar
-        if (response && response.data && response.data.products) {
-            return response.data.products.map((p: any) => ({
-                title: p.attributes.name,
-                price: p.skus && p.skus[0] ? p.skus[0].price : 0,
-                image: p.images && p.images[0] ? p.images[0] : '',
-                link: p.skus && p.skus[0] && p.skus[0].Url ? p.skus[0].Url : `https://www.lazada.co.th/products/-i${p.item_id}.html`,
-                sold: 0 // API might not return sold count easily
+        if (lazadaItems.length > 0) {
+            console.log(`[Lazada] Found ${lazadaItems.length} items from Passio.`);
+            return lazadaItems.slice(0, limit).map(p => ({
+                itemId: p.id,
+                name: p.name,
+                price: p.salePrice || p.price,
+                imageUrl: p.imageUrl,
+                productLink: p.affiliateLink,
+                salePrice: p.salePrice,
+                discount: p.discountDetails,
+                sold: 0
             }));
         }
 
-        return [];
+        console.log(`[Lazada] Passio returned 0 Lazada items. Trying AccessTrade fallback...`);
 
-    } catch (error) {
-        console.error("API Search Error:", error);
-        return [];
+        // 2. AccessTrade Fallback
+        const atItems = await searchAccessTradeProducts(keyword, 20);
+        if (atItems.length > 0) {
+            console.log(`[Lazada] Found ${atItems.length} items from AccessTrade.`);
+            return atItems.slice(0, limit).map(p => ({
+                itemId: p.id,
+                name: p.title,
+                price: p.sale_price || p.price,
+                imageUrl: p.image_url,
+                productLink: p.link,
+                salePrice: p.sale_price,
+                sold: 0
+            }));
+        }
+
+    } catch (error: any) {
+        console.error('Lazada Search Error:', error.message);
     }
+
+    return [];
 }

@@ -46,6 +46,30 @@ git push -u origin main
 
 ---
 
+### Phase 1.5: เตรียม Database (สำคัญ!)
+โปรเจ็คนี้ต้องใช้ **MySQL Database** สำหรับเก็บประวัติการค้นหาและคลิก
+
+**1. สมัคร TiDB Cloud (แนะนำสำหรับ Free Tier):**
+1. ไปที่ [tidbcloud.com](https://tidbcloud.com/)
+2. สมัครบัญชีและสร้าง Cluster ฟรี (Serverless)
+3. เมื่อสร้างเสร็จ ให้กด **"Connect"** เพื่อดูรายละเอียดการเชื่อมต่อ
+   - **Host:** (เช่น gateway01.ap-southeast-1.prod.aws.tidbcloud.com)
+   - **User:** (เช่น 3Kn...root)
+   - **Password:**
+   - **Port:** 4000
+
+**2. สร้างตารางใน Database (Run บนคอมของคุณ):**
+กลับมาที่ PowerShell ในโปรเจ็ค รันคำสั่งนี้เพื่อสร้างตารางบน Cloud:
+```powershell
+# ตั้งค่า Connection string (แทนที่ข้อมูลจริง)
+$env:DATABASE_URL="mysql://USER:PASSWORD@HOST:4000/test?sslaccept=strict"
+
+# สร้างตาราง
+npx prisma db push
+```
+
+---
+
 ### Phase 2: Deploy บน Render
 
 #### 2.1 สร้าง Render Account
@@ -95,6 +119,11 @@ npm start
 | `INVOLVE_API_SECRET` | `your_involve_api_secret` |
 | `PASSIO_API_KEY` | `your_passio_api_key` |
 | `NODE_ENV` | `production` |
+| `MYSQL_HOST` | `Host ของ MySQL Database` (เช่นจาก TiDB Cloud) |
+| `MYSQL_USER` | `Username` |
+| `MYSQL_PASSWORD` | `Password` |
+| `MYSQL_DATABASE` | `ชื่อ Database` |
+| `MYSQL_PORT` | `4000` (สำหรับ TiDB) หรือ `3306` |
 
 #### 2.5 Deploy!
 - กด **"Create Web Service"**
@@ -216,6 +245,13 @@ git push
 **วิธีแก้:**
 - ตั้ง Cron Job (ตาม Phase 4)
 - หรืออัปเกรดเป็น Paid Plan ($7/เดือน)
+
+### 5. เชื่อมต่อ Database ไม่ได้
+**อาการ:** บอททำงานแต่ไม่เก็บสถิติ หรือ Error 500
+**วิธีแก้:**
+- เช็คค่า `MYSQL_...` ใน Environment Variables
+- ตรวจสอบว่า Database เปิดให้ Public Access (หรือ Allow IP ของ Render)
+- TiDB Cloud ใช้งานได้เลยไม่ต้องตั้งค่า IP Whitelist เพิ่มเติม
 
 ---
 
