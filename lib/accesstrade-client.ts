@@ -51,8 +51,8 @@ export async function searchAccessTradeProducts(keyword: string, limit: number =
 
         const response = await axios.get(apiUrl, {
             headers: {
-                'Authorization': `Key ${accessKey}`,
-                'Access-Key': accessKey // Try both convention
+                'Authorization': `Key ${accessKey.trim()}`,
+                'Access-Key': accessKey.trim() // Try both convention
             },
             params: {
                 keyword: keyword,
