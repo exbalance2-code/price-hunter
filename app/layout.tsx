@@ -10,9 +10,9 @@ const prompt = Prompt({
 });
 
 export const metadata: Metadata = {
-  title: "Price Hunter Bot - ผู้ช่วยค้นหาสินค้าราคาถูกจาก Lazada ผ่าน LINE",
-  description: "ค้นหาสินค้าจาก Lazada ได้ง่ายๆ ผ่าน LINE Bot เปรียบเทียบราคา คัดเฉพาะร้านน่าเชื่อถือ ส่งผลลัพธ์ภายใน 3 วินาที ใช้งานฟรีตลอดชีพ",
-  keywords: ["price hunter bot", "ค้นหาสินค้า", "lazada", "เปรียบเทียบราคา", "line bot", "ช้อปปิ้งออนไลน์", "ของถูก"],
+  title: "Price Hunter Bot - ผู้ช่วยค้นหาสินค้าโปรแรงจาก Shopee ผ่าน LINE",
+  description: "ค้นหาสินค้าจาก Shopee ได้ง่ายๆ ผ่าน LINE Bot เปรียบเทียบราคา คัดเฉพาะร้านน่าเชื่อถือ ส่งผลลัพธ์ภายใน 3 วินาที ใช้งานฟรีตลอดชีพ",
+  keywords: ["price hunter bot", "ค้นหาสินค้า", "shopee", "ช้อปปี้", "เปรียบเทียบราคา", "line bot", "ช้อปปิ้งออนไลน์", "ของถูก"],
   authors: [{ name: "Price Hunter Bot Team" }],
   creator: "Price Hunter Bot",
   publisher: "Price Hunter Bot",
@@ -32,8 +32,8 @@ export const metadata: Metadata = {
     locale: "th_TH",
     url: "https://price-hunter.vercel.app",
     siteName: "Price Hunter Bot",
-    title: "Price Hunter Bot - ผู้ช่วยค้นหาสินค้าราคาถูกจาก Lazada",
-    description: "ค้นหาสินค้าจาก Lazada ได้ง่ายๆ ผ่าน LINE Bot เปรียบเทียบราคา คัดเฉพาะร้านน่าเชื่อถือ",
+    title: "Price Hunter Bot - ผู้ช่วยค้นหาสินค้าโปรแรงจาก Shopee",
+    description: "ค้นหาสินค้าจาก Shopee ได้ง่ายๆ ผ่าน LINE Bot เปรียบเทียบราคา คัดเฉพาะร้านน่าเชื่อถือ",
     images: [
       {
         url: "/og-image.png",
@@ -45,8 +45,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Price Hunter Bot - ผู้ช่วยค้นหาสินค้าราคาถูกจาก Lazada",
-    description: "ค้นหาสินค้าจาก Lazada ได้ง่ายๆ ผ่าน LINE Bot เปรียบเทียบราคา คัดเฉพาะร้านน่าเชื่อถือ",
+    title: "Price Hunter Bot - ผู้ช่วยค้นหาสินค้าโปรแรงจาก Shopee",
+    description: "ค้นหาสินค้าจาก Shopee ได้ง่ายๆ ผ่าน LINE Bot เปรียบเทียบราคา คัดเฉพาะร้านน่าเชื่อถือ",
     images: ["/og-image.png"],
   },
   verification: {
@@ -73,7 +73,7 @@ export default function RootLayout({
               "@context": "https://schema.org",
               "@type": "WebApplication",
               "name": "Price Hunter Bot",
-              "description": "ผู้ช่วยค้นหาสินค้าราคาถูกจาก Lazada ผ่าน LINE Bot",
+              "description": "ผู้ช่วยค้นหาสินค้าโปรแรงจาก Shopee ผ่าน LINE Bot",
               "url": "https://price-hunter.vercel.app",
               "applicationCategory": "UtilitiesApplication",
               "operatingSystem": "All",

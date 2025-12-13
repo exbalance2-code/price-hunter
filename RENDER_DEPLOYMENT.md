@@ -124,6 +124,7 @@ npm start
 | `MYSQL_PASSWORD` | `Password` |
 | `MYSQL_DATABASE` | `ชื่อ Database` |
 | `MYSQL_PORT` | `4000` (สำหรับ TiDB) หรือ `3306` |
+| `ADMIN_PASSWORD` | `รหัสผ่านเข้าหลังบ้าน` (ตั้งเองได้เลย) |
 
 #### 2.5 Deploy!
 - กด **"Create Web Service"**

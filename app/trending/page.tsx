@@ -47,7 +47,7 @@ export default function TrendingPage() {
 
     const shareToTwitter = () => {
         const url = window.location.href;
-        const text = '🔥 สินค้ายอดนิยมสัปดาห์นี้! ดูราคาดีที่สุดจาก Shopee & Lazada';
+        const text = '🔥 สินค้ายอดนิยมสัปดาห์นี้! ดูราคาดีที่สุดจาก Shopee';
         window.open(`https://twitter.com/intent/tweet?url=${encodeURIComponent(url)}&text=${encodeURIComponent(text)}`, '_blank');
         showNotification('เปิดหน้าต่างแชร์ Twitter แล้ว!');
     };
@@ -67,39 +67,39 @@ export default function TrendingPage() {
 
     if (loading) {
         return (
-            <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 flex items-center justify-center">
-                <div className="text-white text-lg">กำลังโหลด...</div>
+            <div className="min-h-screen bg-gradient-to-br from-gray-900 via-orange-900 to-red-900 flex items-center justify-center">
+                <div className="text-white text-lg animate-pulse">กำลังโหลด...</div>
             </div>
         );
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 flex flex-col">
+        <div className="min-h-screen bg-gradient-to-br from-gray-900 via-orange-900 to-red-900 flex flex-col">
             {/* Navbar */}
             <nav className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-sm border-b border-gray-200 shadow-sm">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex justify-between items-center h-20">
                         <Link href="/" className="flex items-center gap-3">
-                            <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-blue-700 rounded-lg flex items-center justify-center shadow-lg">
+                            <div className="w-10 h-10 bg-gradient-to-br from-orange-500 to-red-600 rounded-lg flex items-center justify-center shadow-lg">
                                 <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                                 </svg>
                             </div>
-                            <span className="text-xl font-bold bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent">
+                            <span className="text-xl font-bold bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-transparent">
                                 Price Hunter Bot
                             </span>
                         </Link>
 
                         <div className="hidden md:flex items-center gap-8">
-                            <Link href="/" className="text-sm text-gray-700 hover:text-blue-600 font-medium transition-colors">หน้าแรก</Link>
-                            <Link href="/trending" className="text-sm text-blue-600 font-semibold transition-colors flex items-center gap-1">
+                            <Link href="/" className="text-sm text-gray-700 hover:text-orange-600 font-medium transition-colors">หน้าแรก</Link>
+                            <Link href="/trending" className="text-sm text-orange-600 font-semibold transition-colors flex items-center gap-1">
                                 🔥 สินค้ายอดนิยม
                             </Link>
                             <a
                                 href="https://lin.ee/8VZY6eI"
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="px-6 py-2.5 bg-gradient-to-r from-blue-600 to-blue-700 text-white text-sm rounded-lg font-semibold hover:shadow-lg hover:shadow-blue-500/30 transition-all duration-300 transform hover:-translate-y-0.5"
+                                className="px-6 py-2.5 bg-gradient-to-r from-orange-500 to-red-600 text-white text-sm rounded-lg font-semibold hover:shadow-lg hover:shadow-orange-500/30 transition-all duration-300 transform hover:-translate-y-0.5"
                             >
                                 เริ่มใช้งาน
                             </a>
@@ -117,15 +117,15 @@ export default function TrendingPage() {
             {/* Main Content Wrapper */}
             <div className="flex-grow">
                 {/* Header */}
-                <div className="bg-white/10 backdrop-blur-lg border-b border-white/20 mt-20">
-                    <div className="max-w-7xl mx-auto px-6 py-4">
+                <div className="bg-white/5 backdrop-blur-lg border-b border-white/10 mt-20">
+                    <div className="max-w-7xl mx-auto px-6 py-6">
                         <div className="flex items-start justify-between">
                             <div>
-                                <h1 className="text-2xl font-bold text-white mb-1">
+                                <h1 className="text-2xl font-bold text-white mb-2">
                                     🔥 สินค้ายอดนิยม
                                 </h1>
-                                <p className="text-blue-200 text-sm">
-                                    สินค้าที่ได้รับความสนใจมากที่สุดในสัปดาห์นี้
+                                <p className="text-orange-100 text-sm opacity-80">
+                                    สินค้าจาก Shopee ที่ได้รับความสนใจมากที่สุดในสัปดาห์นี้
                                 </p>
                             </div>
 
@@ -181,7 +181,7 @@ export default function TrendingPage() {
                         <div className="bg-white/10 backdrop-blur-lg rounded-xl p-8 border border-white/20 text-center">
                             <div className="text-4xl mb-3">📦</div>
                             <h2 className="text-lg font-bold text-white mb-2">ยังไม่มีข้อมูล</h2>
-                            <p className="text-blue-200 text-sm">
+                            <p className="text-orange-200 text-sm opacity-80">
                                 ลองค้นหาสินค้าผ่าน LINE bot เพื่อดูสินค้ายอดนิยม
                             </p>
                         </div>
@@ -194,10 +194,10 @@ export default function TrendingPage() {
                                 >
                                     {/* Rank Badge */}
                                     {index < 3 && (
-                                        <div className={`absolute top-2 right-2 w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm
-                    ${index === 0 ? 'bg-yellow-500 text-yellow-900' : ''}
-                    ${index === 1 ? 'bg-gray-400 text-gray-900' : ''}
-                    ${index === 2 ? 'bg-orange-600 text-orange-100' : ''}
+                                        <div className={`absolute top-2 right-2 w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm shadow-md
+                    ${index === 0 ? 'bg-yellow-400 text-yellow-900 ring-2 ring-yellow-200' : ''}
+                    ${index === 1 ? 'bg-gray-300 text-gray-800 ring-2 ring-gray-100' : ''}
+                    ${index === 2 ? 'bg-orange-700 text-orange-100 ring-2 ring-orange-500' : ''}
                   `}>
                                             #{index + 1}
                                         </div>
@@ -210,30 +210,30 @@ export default function TrendingPage() {
                                         </h3>
 
                                         <div className="flex items-center justify-between mb-2">
-                                            <div className="text-green-400 font-bold text-lg">
+                                            <div className="text-orange-300 font-bold text-lg">
                                                 ฿{parseFloat(product.product_price).toLocaleString()}
                                             </div>
                                         </div>
 
                                         <div className="flex items-center gap-1 mb-2 flex-wrap">
                                             <span className={`px-2 py-0.5 rounded-full text-xs font-semibold
-                      ${product.platform === 'shopee' ? 'bg-orange-500/30 text-orange-200' : 'bg-purple-500/30 text-purple-200'}
+                      ${product.platform === 'shopee' ? 'bg-orange-500/80 text-white' : 'bg-gray-500/50 text-gray-200'}
                     `}>
-                                                {product.platform === 'shopee' ? 'S' : 'L'}
+                                                {product.platform === 'shopee' ? 'Shopee' : 'Lazada'}
                                             </span>
-                                            <span className="bg-blue-500/30 px-2 py-0.5 rounded-full text-blue-200 text-xs font-semibold">
+                                            <span className="bg-red-500/30 px-2 py-0.5 rounded-full text-red-200 text-xs font-semibold">
                                                 🔥 {product.click_count}
                                             </span>
                                         </div>
 
-                                        <div className="text-blue-300 text-xs">
+                                        <div className="text-orange-200/60 text-xs">
                                             {new Date(product.last_clicked).toLocaleDateString('th-TH', { month: 'short', day: 'numeric' })}
                                         </div>
                                     </div>
 
                                     {/* CTA */}
-                                    <div className="mt-2 pt-2 border-t border-white/20">
-                                        <p className="text-blue-200 text-xs text-center">
+                                    <div className="mt-2 pt-2 border-t border-white/10">
+                                        <p className="text-orange-200 text-xs text-center opacity-80">
                                             💬 ค้นหาผ่าน LINE bot
                                         </p>
                                     </div>
@@ -243,18 +243,18 @@ export default function TrendingPage() {
                     )}
 
                     {/* Footer CTA */}
-                    <div className="mt-6 bg-gradient-to-r from-blue-500/20 to-purple-500/20 backdrop-blur-lg rounded-xl p-6 border border-white/20 text-center">
+                    <div className="mt-6 bg-gradient-to-r from-orange-500/20 to-red-600/20 backdrop-blur-lg rounded-xl p-6 border border-white/10 text-center">
                         <h2 className="text-xl font-bold text-white mb-2">
-                            🤖 ค้นหาสินค้าผ่าน LINE Bot
+                            🤖 อยากได้ของถูก? ให้บอทช่วยหา
                         </h2>
-                        <p className="text-blue-200 mb-4 text-sm">
-                            เปรียบเทียบราคาจาก Shopee และ Lazada ได้ทันที
+                        <p className="text-orange-200 mb-4 text-sm opacity-90">
+                            ค้นหาโปรลับจาก Shopee ได้ทันทีผ่าน LINE
                         </p>
                         <Link
                             href="/"
-                            className="inline-block bg-gradient-to-r from-blue-500 to-purple-500 text-white font-semibold px-6 py-3 rounded-full hover:from-blue-600 hover:to-purple-600 transition-all transform hover:scale-105 text-sm"
+                            className="inline-block bg-gradient-to-r from-orange-500 to-red-600 text-white font-semibold px-6 py-3 rounded-full hover:shadow-lg hover:shadow-orange-500/30 transition-all transform hover:scale-105 text-sm"
                         >
-                            เริ่มใช้งาน →
+                            เริ่มใช้งานฟรี →
                         </Link>
                     </div>
                 </div>
@@ -262,7 +262,7 @@ export default function TrendingPage() {
                 {/* Toast Notification */}
                 {showToast && (
                     <div className="fixed bottom-8 right-8 z-50 animate-slide-up">
-                        <div className="bg-gradient-to-r from-green-500 to-emerald-500 text-white px-6 py-4 rounded-xl shadow-2xl flex items-center gap-3 backdrop-blur-lg border border-white/20">
+                        <div className="bg-gradient-to-r from-green-500 to-emerald-600 text-white px-6 py-4 rounded-xl shadow-2xl flex items-center gap-3 backdrop-blur-lg border border-white/20">
                             <svg className="w-6 h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                             </svg>
@@ -294,7 +294,7 @@ export default function TrendingPage() {
                     <div className="grid md:grid-cols-4 gap-8 mb-8">
                         <div className="md:col-span-2">
                             <div className="flex items-center gap-3 mb-4">
-                                <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-blue-700 rounded-lg flex items-center justify-center">
+                                <div className="w-10 h-10 bg-gradient-to-br from-orange-500 to-red-600 rounded-lg flex items-center justify-center">
                                     <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                                     </svg>
@@ -302,7 +302,7 @@ export default function TrendingPage() {
                                 <span className="text-xl font-bold">Price Hunter Bot</span>
                             </div>
                             <p className="text-sm text-gray-400 leading-relaxed max-w-md">
-                                ผู้ช่วยค้นหาสินค้าอัจฉริยะที่จะช่วยให้คุณช้อปปิ้งได้อย่างฉลาด ประหยัด และปลอดภัย
+                                ผู้ช่วยค้นหาสินค้าจาก Shopee อัจฉริยะ ช่วยให้คุณช้อปฉลาด ประหยัด ง่าย และปลอดภัย
                             </p>
                         </div>
 
@@ -311,7 +311,6 @@ export default function TrendingPage() {
                             <ul className="space-y-2">
                                 <li><Link href="/" className="text-sm text-gray-400 hover:text-white transition-colors">หน้าแรก</Link></li>
                                 <li><Link href="/trending" className="text-sm text-gray-400 hover:text-white transition-colors">🔥 สินค้ายอดนิยม</Link></li>
-                                <li><Link href="/admin" className="text-sm text-gray-400 hover:text-white transition-colors">Admin</Link></li>
                             </ul>
                         </div>
 
@@ -333,7 +332,7 @@ export default function TrendingPage() {
 
                     <div className="border-t border-gray-800 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
                         <p className="text-gray-400 text-xs">
-                            © {new Date().getFullYear()} Price Hunter Bot. All rights reserved. | v2.0.0
+                            © {new Date().getFullYear()} Price Hunter Bot. All rights reserved. | v2.1.0 (Shopee Edition)
                         </p>
                         <div className="flex gap-6 text-xs text-gray-400">
                             <Link href="/privacy-policy" className="hover:text-white transition-colors">นโยบายความเป็นส่วนตัว</Link>

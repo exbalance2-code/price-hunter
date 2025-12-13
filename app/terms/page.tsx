@@ -9,26 +9,26 @@ export default function TermsOfService() {
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex justify-between items-center h-20">
                         <Link href="/" className="flex items-center gap-3">
-                            <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-blue-700 rounded-lg flex items-center justify-center shadow-lg">
+                            <div className="w-10 h-10 bg-gradient-to-br from-orange-500 to-red-600 rounded-lg flex items-center justify-center shadow-lg">
                                 <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                                 </svg>
                             </div>
-                            <span className="text-xl font-bold bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent">
+                            <span className="text-xl font-bold bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-transparent">
                                 Price Hunter Bot
                             </span>
                         </Link>
 
                         <div className="hidden md:flex items-center gap-8">
-                            <Link href="/" className="text-sm text-gray-700 hover:text-blue-600 font-medium transition-colors">หน้าแรก</Link>
-                            <Link href="/trending" className="text-sm text-gray-700 hover:text-blue-600 font-medium transition-colors flex items-center gap-1">
+                            <Link href="/" className="text-sm text-gray-700 hover:text-orange-600 font-medium transition-colors">หน้าแรก</Link>
+                            <Link href="/trending" className="text-sm text-gray-700 hover:text-orange-600 font-medium transition-colors flex items-center gap-1">
                                 🔥 สินค้ายอดนิยม
                             </Link>
                             <a
                                 href="https://lin.ee/8VZY6eI"
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="px-6 py-2.5 bg-gradient-to-r from-blue-600 to-blue-700 text-white text-sm rounded-lg font-semibold hover:shadow-lg hover:shadow-blue-500/30 transition-all duration-300 transform hover:-translate-y-0.5"
+                                className="px-6 py-2.5 bg-gradient-to-r from-orange-500 to-red-600 text-white text-sm rounded-lg font-semibold hover:shadow-lg hover:shadow-orange-500/30 transition-all duration-300 transform hover:-translate-y-0.5"
                             >
                                 เริ่มใช้งาน
                             </a>
@@ -48,14 +48,14 @@ export default function TermsOfService() {
                 <div className="max-w-4xl mx-auto">
                     <h1 className="text-3xl font-bold text-gray-900 mb-8">เงื่อนไขการใช้งาน (Terms of Service)</h1>
 
-                    <div className="prose prose-blue max-w-none text-gray-600">
+                    <div className="prose prose-orange max-w-none text-gray-600">
                         <p className="mb-6">
                             ยินดีต้อนรับสู่ Price Hunter Bot ("บริการ") โปรดอ่านเงื่อนไขการใช้งานนี้อย่างละเอียดก่อนใช้งาน LINE Bot ของเรา
                         </p>
 
                         <h2 className="text-xl font-bold text-gray-900 mt-8 mb-4">1. ลักษณะการให้บริการ</h2>
                         <p className="mb-4">
-                            Price Hunter Bot เป็นเพียง <strong>"เครื่องมือค้นหาและเปรียบเทียบราคา"</strong> เท่านั้น เราทำหน้าที่รวบรวมข้อมูลสินค้าจากแพลตฟอร์ม E-commerce (เช่น Lazada, Shopee) มาแสดงผลเพื่ออำนวยความสะดวกแก่ผู้ใช้งาน
+                            Price Hunter Bot เป็นเพียง <strong>"เครื่องมือค้นหาและเปรียบเทียบราคา"</strong> เท่านั้น เราทำหน้าที่รวบรวมข้อมูลสินค้าจากแพลตฟอร์ม E-commerce (Shopee) มาแสดงผลเพื่ออำนวยความสะดวกแก่ผู้ใช้งาน
                         </p>
                         <p className="mb-6 text-red-600 font-semibold">
                             *เราไม่ใช่ผู้ขายสินค้า ไม่ใช่เจ้าของร้านค้า และไม่มีส่วนเกี่ยวข้องกับการจัดส่งหรือรับชำระเงินใดๆ ทั้งสิ้น*
@@ -100,7 +100,7 @@ export default function TermsOfService() {
                                 href="https://www.facebook.com/profile.php?id=61584449372366"
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="text-blue-600 hover:text-blue-800 underline font-semibold"
+                                className="text-orange-600 hover:text-orange-800 underline font-semibold"
                             >
                                 Facebook Page: Price Hunter
                             </a>
@@ -108,7 +108,7 @@ export default function TermsOfService() {
 
                         <div className="mt-12 pt-8 border-t border-gray-200">
                             <p className="text-sm text-gray-500">
-                                อัปเดตล่าสุด: 7 ธันวาคม 2568
+                                อัปเดตล่าสุด: 13 ธันวาคม 2568
                             </p>
                         </div>
                     </div>
@@ -121,7 +121,7 @@ export default function TermsOfService() {
                     <div className="grid md:grid-cols-4 gap-8 mb-8">
                         <div className="md:col-span-2">
                             <div className="flex items-center gap-3 mb-4">
-                                <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-blue-700 rounded-lg flex items-center justify-center">
+                                <div className="w-10 h-10 bg-gradient-to-br from-orange-500 to-red-600 rounded-lg flex items-center justify-center">
                                     <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                                     </svg>
@@ -129,7 +129,7 @@ export default function TermsOfService() {
                                 <span className="text-xl font-bold">Price Hunter Bot</span>
                             </div>
                             <p className="text-sm text-gray-400 leading-relaxed max-w-md">
-                                ผู้ช่วยค้นหาสินค้าอัจฉริยะที่จะช่วยให้คุณช้อปปิ้งได้อย่างฉลาด ประหยัด และปลอดภัย
+                                ผู้ช่วยค้นหาสินค้าจาก Shopee อัจฉริยะ ช่วยให้คุณช้อปฉลาด ประหยัด ง่าย และปลอดภัย
                             </p>
                         </div>
 
@@ -138,7 +138,6 @@ export default function TermsOfService() {
                             <ul className="space-y-2">
                                 <li><Link href="/" className="text-sm text-gray-400 hover:text-white transition-colors">หน้าแรก</Link></li>
                                 <li><Link href="/trending" className="text-sm text-gray-400 hover:text-white transition-colors">🔥 สินค้ายอดนิยม</Link></li>
-                                <li><Link href="/admin" className="text-sm text-gray-400 hover:text-white transition-colors">Admin</Link></li>
                             </ul>
                         </div>
 
@@ -160,7 +159,7 @@ export default function TermsOfService() {
 
                     <div className="border-t border-gray-800 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
                         <p className="text-gray-400 text-xs">
-                            © {new Date().getFullYear()} Price Hunter Bot. All rights reserved. | v2.0.0
+                            © {new Date().getFullYear()} Price Hunter Bot. All rights reserved. | v2.1.0 (Shopee Edition)
                         </p>
                         <div className="flex gap-6 text-xs text-gray-400">
                             <Link href="/privacy-policy" className="hover:text-white transition-colors">นโยบายความเป็นส่วนตัว</Link>
