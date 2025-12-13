@@ -1,4 +1,4 @@
-import { searchPassioProducts } from './passio-client';
+
 import { searchAccessTradeProducts } from './accesstrade-client';
 
 export interface LazadaProduct {
