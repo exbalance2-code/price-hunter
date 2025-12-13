@@ -10,6 +10,13 @@ const PASSIO_KEY = process.env.PASSIO_API_KEY; // 👈 เพิ่ม Key ข�
 
 export async function convertToAffiliateLink(rawUrl: string) {
 
+    // 0. เช็คว่าเป็น Shopee Affiliate Link อยู่แล้วหรือไม่ (จาก Official API)
+    // ถ้าใช่ ให้ส่งกลับได้เลย ไม่ต้องผ่าน Passio ซ้ำ
+    if (rawUrl.includes('shope.ee') || rawUrl.includes('s.shopee.co.th')) {
+        console.log("✅ ลิงก์นี้เป็น Shopee Affiliate อยู่แล้ว (Skip Passio)");
+        return rawUrl;
+    }
+
     // 1. ลองใช้ Passio ก่อน (ถ้ามี Key)
     if (PASSIO_KEY) {
         try {

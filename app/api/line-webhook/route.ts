@@ -72,7 +72,7 @@ export async function POST(req: Request) {
                 let lazadaProducts: any[] = [];
 
                 try {
-                    console.log('Searching via Shopee & Lazada APIs...');
+                    console.log('Searching via Shopee API...');
 
                     // Run searches in parallel
                     const [shopeeItems, lazadaItems] = await Promise.all([
