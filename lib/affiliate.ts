@@ -1,65 +1,13 @@
-import axios from 'axios';
-import hmacSHA256 from 'crypto-js/hmac-sha256';
-import Base64 from 'crypto-js/enc-base64';
 
-// ดึง Key จาก Environment Variable
-const ACCESSTRADE_KEY = process.env.ACCESSTRADE_KEY;
-const INVOLVE_KEY = process.env.INVOLVE_API_KEY;
-const INVOLVE_SECRET = process.env.INVOLVE_API_SECRET;
+export async function convertToAffiliateLink(rawUrl: string) {
 
-// 1. ลองใช้ AccessTrade (ถ้ามี Key)
-if (ACCESSTRADE_KEY) {
-    try {
-        console.log("🔄 กำลังแปลงลิงก์ด้วย AccessTrade...");
-        const res = await axios.get('https://api.accesstrade.in.th/v1/deeplink', {
-            params: { url: rawUrl },
-            headers: { 'Authorization': `Key ${ACCESSTRADE_KEY}` }
-        });
-
-        // เช็คผลลัพธ์
-        if (res.data && res.data.data && res.data.data.link) {
-            console.log("💰 ได้ลิงก์ AccessTrade แล้ว!");
-            return res.data.data.link;
-        }
-    } catch (e: any) {
-        console.error("⚠️ AccessTrade Convert Failed:", e.message);
+    // 0. เช็คว่าเป็น Shopee Affiliate Link อยู่แล้วหรือไม่ (จาก Official API)
+    // ถ้าใช่ ให้ส่งกลับได้เลย ไม่ต้องผ่าน Passio ซ้ำ
+    if (rawUrl.includes('shope.ee') || rawUrl.includes('s.shopee.co.th')) {
+        console.log("✅ ลิงก์นี้เป็น Shopee Affiliate อยู่แล้ว");
+        return rawUrl;
     }
-}
 
-// 3. ถ้า AccessTrade ไม่ได้ ให้ลอง Involve Asia (ถ้ามี Key)
-if (INVOLVE_KEY && INVOLVE_SECRET) {
-    try {
-        console.log("🔄 กำลังแปลงลิงก์ด้วย Involve Asia...");
-
-        // สร้างลายเซ็นความปลอดภัย (Signature)
-        const timestamp = Math.floor(Date.now() / 1000).toString();
-        const signature = Base64.stringify(hmacSHA256(INVOLVE_KEY + timestamp, INVOLVE_SECRET));
-
-        const res = await axios.post('https://api.involve.asia/api/deeplink/generate',
-            {
-                url: rawUrl
-            },
-            {
-                headers: {
-                    'Authorization': `Bearer ${INVOLVE_KEY}`,
-                    'Involve-Signature': signature,
-                    'Involve-Timestamp': timestamp,
-                    'Content-Type': 'application/json'
-                }
-            }
-        );
-
-        // เช็คผลลัพธ์
-        if (res.data && res.data.data && res.data.data.generated_url) {
-            console.log("💰 ได้ลิงก์ Involve Asia แล้ว!");
-            return res.data.data.generated_url;
-        }
-    } catch (e: any) {
-        console.error("⚠️ Involve Asia Convert Failed:", e.response?.data || e.message);
-    }
-}
-
-// 4. ถ้าไม่มี Key อะไรเลย หรือแปลงไม่ผ่าน -> ส่งลิงก์เดิมกลับไป
-// (ลูกค้ากดได้เหมือนเดิม แต่เราไม่ได้ค่าคอมฯ)
-return rawUrl;
+    // Default: Return original URL (We only support Shopee direct links now)
+    return rawUrl;
 }

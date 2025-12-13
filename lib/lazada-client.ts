@@ -1,5 +1,5 @@
 
-import { searchAccessTradeProducts } from './accesstrade-client';
+
 
 export interface LazadaProduct {
     itemId: string;
