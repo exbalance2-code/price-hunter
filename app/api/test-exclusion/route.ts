@@ -33,8 +33,17 @@ export async function GET(request: Request) {
 
     const { apiUrl, accessKey, secretKey } = await getSettings();
 
+    // Detailed diagnostics
     if (!apiUrl || !accessKey) {
-        return NextResponse.json({ error: 'Settings missing' }, { status: 400 });
+        return NextResponse.json({
+            error: 'Settings missing',
+            details: {
+                apiUrl: apiUrl ? 'SET' : 'MISSING',
+                accessKey: accessKey ? 'SET' : 'MISSING',
+                secretKey: secretKey ? 'SET' : 'MISSING'
+            },
+            help: 'Please go to /admin/settings and save your AccessTrade configuration'
+        }, { status: 400 });
     }
 
     try {
