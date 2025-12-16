@@ -37,10 +37,10 @@ export async function fetchAccessTradeKeys(username: string, password: string): 
         const signature = crypto.createHash('sha256').update(rawSignature).digest('hex');
 
         // 4. Call API
-        // Base URL for global auth usually. If this fails, we might need regional.
-        const authUrl = `https://api.accesstrade.global/v1/publishers/auth/${username}`;
+        // Correct Endpoint for Thailand: https://gurkha.accesstrade.in.th/publishers/auth/{username}
+        const authUrl = `https://gurkha.accesstrade.in.th/publishers/auth/${username}`;
 
-        console.log(`Authenticating AccessTrade User: ${username}`);
+        console.log(`Authenticating AccessTrade User: ${username} at ${authUrl}`);
 
         const response = await axios.get(authUrl, {
             headers: {
