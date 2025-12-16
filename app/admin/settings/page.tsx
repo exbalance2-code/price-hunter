@@ -19,6 +19,7 @@ interface Settings {
     passio_api_token: string;
     passio_api_url: string;
     accesstrade_access_key: string;
+    accesstrade_secret_key: string;
     accesstrade_api_url: string;
 }
 
@@ -39,6 +40,7 @@ export default function AdminSettings() {
         passio_api_token: '',
         passio_api_url: '',
         accesstrade_access_key: '',
+        accesstrade_secret_key: '',
         accesstrade_api_url: '',
     });
 
@@ -348,6 +350,26 @@ export default function AdminSettings() {
                                         className="absolute right-3 top-1/2 -translate-y-1/2 text-blue-300 hover:text-white"
                                     >
                                         {showPasswords.accesstrade ? '👁️' : '👁️‍🗨️'}
+                                    </button>
+                                </div>
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-blue-200 mb-2">
+                                    Secret Key
+                                </label>
+                                <div className="relative">
+                                    <input
+                                        type={showPasswords.accesstrade_secret ? 'text' : 'password'}
+                                        value={settings.accesstrade_secret_key}
+                                        onChange={(e) => setSettings({ ...settings, accesstrade_secret_key: e.target.value })}
+                                        className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono"
+                                        placeholder="Enter AccessTrade Secret Key"
+                                    />
+                                    <button
+                                        onClick={() => togglePassword('accesstrade_secret')}
+                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-blue-300 hover:text-white"
+                                    >
+                                        {showPasswords.accesstrade_secret ? '👁️' : '👁️‍🗨️'}
                                     </button>
                                 </div>
                             </div>

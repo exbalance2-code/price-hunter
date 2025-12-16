@@ -114,6 +114,7 @@ export async function GET(request: Request) {
             passio_api_url: process.env.PASSIO_API_URL || '',
             accesstrade_access_key: process.env.ACCESSTRADE_ACCESS_KEY || '',
             accesstrade_api_url: process.env.ACCESSTRADE_API_URL || '',
+            accesstrade_secret_key: process.env.ACCESSTRADE_SECRET_KEY || '',
         };
 
         // Merge กับค่า default

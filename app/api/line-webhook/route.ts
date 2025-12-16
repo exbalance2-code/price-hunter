@@ -1,8 +1,9 @@
 import { NextResponse } from 'next/server';
 import { Client, WebhookEvent, FlexBubble } from '@line/bot-sdk';
 // import { searchProducts } from '@/lib/scraper';
-import { searchLazadaProducts } from '@/lib/lazada-client';
+
 import { searchShopeeProducts } from '@/lib/shopee-client';
+import { searchAccessTradeProducts } from '@/lib/accesstrade-client';
 import { convertToAffiliateLink } from '@/lib/affiliate';
 import { logSearch, logClick } from '@/lib/analytics';
 
@@ -68,20 +69,22 @@ export async function POST(req: Request) {
                 }
 
                 // 2. ทำงานเบื้องหลัง (Search Process)
-                let shopeeProducts: any[] = [];
-                let lazadaProducts: any[] = [];
+                let bestProducts: any[] = [];
 
                 try {
-                    console.log('Searching via Shopee API...');
+                    console.log('Searching via Shopee API & AccessTrade...');
 
                     // Run searches in parallel
-                    const [shopeeItems, lazadaItems] = await Promise.all([
-                        searchShopeeProducts(userMessage, 5),
-                        searchLazadaProducts(userMessage, 5)
+                    const [shopeeResult, accessTradeResult] = await Promise.allSettled([
+                        searchShopeeProducts(userMessage, 10),
+                        searchAccessTradeProducts(userMessage, 10)
                     ]);
 
+                    const shopeeItems = shopeeResult.status === 'fulfilled' ? shopeeResult.value : [];
+                    const atItems = accessTradeResult.status === 'fulfilled' ? accessTradeResult.value : [];
+
                     // Format Shopee
-                    shopeeProducts = shopeeItems.map(p => ({
+                    const formattedShopee = shopeeItems.map((p: any) => ({
                         title: p.name,
                         price: p.price,
                         image: p.imageUrl,
@@ -90,30 +93,30 @@ export async function POST(req: Request) {
                         platform: 'shopee'
                     }));
 
-                    // Format Lazada
-                    lazadaProducts = lazadaItems.map(p => ({
-                        title: p.name,
+                    // Format AccessTrade
+                    const formattedAT = atItems.map((p: any) => ({
+                        title: p.title,
                         price: p.price,
-                        image: p.imageUrl,
-                        link: p.productLink,
+                        image: p.image,
+                        link: p.link,
                         sold: p.sold || 0,
-                        platform: 'lazada'
+                        platform: (p.merchant || '').toLowerCase().includes('lazada') ? 'lazada' : 'accesstrade'
                     }));
+
+                    // Merge and Shuffle/Interleave or just append?
+                    // Let's interleave them to show variety
+                    bestProducts = [];
+                    const maxLength = Math.max(formattedShopee.length, formattedAT.length);
+                    for (let i = 0; i < maxLength; i++) {
+                        if (i < formattedShopee.length) bestProducts.push(formattedShopee[i]);
+                        if (i < formattedAT.length) bestProducts.push(formattedAT[i]);
+                    }
 
                 } catch (e: any) {
                     console.error('API Search Failed:', e.message);
                 }
 
-                // Combine results (Interleaved: 1 Shopee, 1 Lazada, ...)
-                const bestProducts: any[] = [];
-                const maxLen = Math.max(shopeeProducts.length, lazadaProducts.length);
-
-                for (let i = 0; i < maxLen; i++) {
-                    if (i < shopeeProducts.length) bestProducts.push(shopeeProducts[i]);
-                    if (i < lazadaProducts.length) bestProducts.push(lazadaProducts[i]);
-                }
-
-                // Limit to 10
+                // Limit local results just in case
                 if (bestProducts.length > 10) {
                     bestProducts.length = 10;
                 }
