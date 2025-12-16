@@ -19,6 +19,57 @@ interface AccessTradeSettings {
     secretKey: string;
 }
 
+interface AccessTradeAuthResponse {
+    userUid: string;
+    secretKey: string;
+    accountId: number;
+}
+
+export async function fetchAccessTradeKeys(username: string, password: string): Promise<AccessTradeAuthResponse> {
+    try {
+        // 1. MD5 Hash Password
+        const md5Password = crypto.createHash('md5').update(password).digest('hex');
+
+        // 2. Format: USERNAME + ':' + MD5(PASSWORD)
+        const rawSignature = `${username}:${md5Password}`;
+
+        // 3. SHA256 Hash the signature
+        const signature = crypto.createHash('sha256').update(rawSignature).digest('hex');
+
+        // 4. Call API
+        // Base URL for global auth usually. If this fails, we might need regional.
+        const authUrl = `https://api.accesstrade.global/v1/publishers/auth/${username}`;
+
+        console.log(`Authenticating AccessTrade User: ${username}`);
+
+        const response = await axios.get(authUrl, {
+            headers: {
+                'Authorization': signature
+            }
+        });
+
+        if (response.data) {
+            return {
+                userUid: response.data.userUid,
+                secretKey: response.data.secretKey,
+                accountId: response.data.accountId
+            };
+        }
+
+        throw new Error('No data received from Auth API');
+
+    } catch (error: any) {
+        console.error('AccessTrade Auth Failed:', error.message);
+        if (error.response) {
+            console.error('Auth Response:', error.response.data);
+            if (error.response.status === 401) {
+                throw new Error('ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง');
+            }
+        }
+        throw error;
+    }
+}
+
 async function getAccessTradeSettings(): Promise<AccessTradeSettings> {
     let apiUrl = process.env.ACCESSTRADE_API_URL || '';
     let accessKey = process.env.ACCESSTRADE_ACCESS_KEY || '';
@@ -77,20 +128,29 @@ function generateToken(accessKey: string, secretKey: string): string {
 export async function searchAccessTradeProducts(keyword: string, limit: number = 10): Promise<AccessTradeProduct[]> {
     const { apiUrl, accessKey, secretKey } = await getAccessTradeSettings();
 
-    if (!apiUrl || !accessKey || !secretKey) {
-        // Only warn if we have a query, to avoid noise at startup if unrelated
-        if (keyword) console.warn('AccessTrade settings missing (API URL, Access Key, or Secret Key)');
+    if (!apiUrl || !accessKey) {
+        // Only warn if we have a query
+        if (keyword) console.warn('AccessTrade settings missing (API URL or Access Key)');
         return [];
     }
 
     try {
-        const token = generateToken(accessKey, secretKey);
+        let headers: Record<string, string> = {
+            'X-Accesstrade-User-Type': 'publisher'
+        };
+
+        if (secretKey) {
+            // Option A: JWT Auth (Requires Secret Key)
+            const token = generateToken(accessKey, secretKey);
+            headers['Authorization'] = `Bearer ${token}`;
+        } else {
+            // Option B: Simple Token Auth (Access Key only)
+            // Common for AccessTrade Datafeed/Product API
+            headers['Authorization'] = `Token ${accessKey}`;
+        }
 
         const response = await axios.get(apiUrl, {
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'X-Accesstrade-User-Type': 'publisher'
-            },
+            headers: headers,
             params: {
                 keyword: keyword,
                 limit: 50
