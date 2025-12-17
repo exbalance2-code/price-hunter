@@ -74,7 +74,7 @@ export async function POST(req: Request) {
                     console.log('Searching via Shopee API...');
 
                     // Search Shopee only
-                    const shopeeItems = await searchShopeeProducts(userMessage, 10);
+                    const shopeeItems = await searchShopeeProducts(userMessage, 5);
 
                     // Format results
                     bestProducts = shopeeItems.map(p => ({
@@ -91,8 +91,8 @@ export async function POST(req: Request) {
                 }
 
                 // Limit local results just in case
-                if (bestProducts.length > 10) {
-                    bestProducts.length = 10;
+                if (bestProducts.length > 5) {
+                    bestProducts.length = 5;
                 }
 
                 // Log search analytics
