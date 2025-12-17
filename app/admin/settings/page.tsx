@@ -18,9 +18,6 @@ interface Settings {
     mysql_database: string;
     passio_api_token: string;
     passio_api_url: string;
-    accesstrade_access_key: string;
-    accesstrade_secret_key: string;
-    accesstrade_api_url: string;
 }
 
 export default function AdminSettings() {
@@ -39,9 +36,6 @@ export default function AdminSettings() {
         mysql_database: '',
         passio_api_token: '',
         passio_api_url: '',
-        accesstrade_access_key: '',
-        accesstrade_secret_key: '',
-        accesstrade_api_url: '',
     });
 
     const [credentials, setCredentials] = useState({
@@ -329,130 +323,6 @@ export default function AdminSettings() {
                         </div>
                     </div>
 
-                    {/* AccessTrade Configuration */}
-                    <div className="bg-white/10 backdrop-blur-lg rounded-xl p-6 border border-white/20">
-                        <h2 className="text-xl font-bold text-white mb-4">🔗 AccessTrade Configuration</h2>
-
-                        {/* Auto-Fetch Keys Section */}
-                        <div className="mb-6 p-4 bg-blue-500/10 border border-blue-500/30 rounded-lg">
-                            <h3 className="text-lg font-semibold text-blue-200 mb-2">⚡ ดึงคีย์อัตโนมัติ (Auto-Fetch)</h3>
-                            <p className="text-sm text-blue-300 mb-4">
-                                หากคุณหา API Key ไม่เจอ กรอก Email/Password ของ AccessTrade เพื่อให้ระบบดึงคีย์ให้อัตโนมัติ
-                            </p>
-                            <div className="grid md:grid-cols-2 gap-4 mb-3">
-                                <input
-                                    type="email"
-                                    placeholder="AccessTrade Email"
-                                    id="at-email"
-                                    className="w-full px-4 py-2 bg-white/5 border border-white/20 rounded-lg text-white"
-                                />
-                                <input
-                                    type="password"
-                                    placeholder="AccessTrade Password"
-                                    id="at-password"
-                                    className="w-full px-4 py-2 bg-white/5 border border-white/20 rounded-lg text-white"
-                                />
-                            </div>
-                            <button
-                                type="button"
-                                onClick={async () => {
-                                    const email = (document.getElementById('at-email') as HTMLInputElement).value;
-                                    const password = (document.getElementById('at-password') as HTMLInputElement).value;
-
-                                    if (!email || !password) {
-                                        alert('กรุณากรอก Email และ Password');
-                                        return;
-                                    }
-
-                                    try {
-                                        setLoading(true);
-                                        const res = await fetch('/api/admin/accesstrade-auth', {
-                                            method: 'POST',
-                                            headers: { 'Content-Type': 'application/json' },
-                                            body: JSON.stringify({ username: email, password })
-                                        });
-                                        const data = await res.json();
-
-                                        if (data.success) {
-                                            setSettings(prev => ({
-                                                ...prev,
-                                                accesstrade_access_key: data.userUid,
-                                                accesstrade_secret_key: data.secretKey
-                                            }));
-                                            alert('✅ ดึงข้อมูลสำเร็จ! บันทึกค่าเรียบร้อย');
-                                        } else {
-                                            alert('❌ ' + data.error);
-                                        }
-                                    } catch (e) {
-                                        alert('❌ เกิดข้อผิดพลาด');
-                                    } finally {
-                                        setLoading(false);
-                                    }
-                                }}
-                                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors text-sm font-medium"
-                            >
-                                🔄 ดึงข้อมูล Keys เดี๋ยวนี้
-                            </button>
-                        </div>
-
-                        <div className="space-y-4">
-                            <div>
-                                <label className="block text-sm font-medium text-blue-200 mb-2">
-                                    Access Key
-                                </label>
-                                <div className="relative">
-                                    <input
-                                        type={showPasswords.accesstrade ? 'text' : 'password'}
-                                        value={settings.accesstrade_access_key}
-                                        onChange={(e) => setSettings({ ...settings, accesstrade_access_key: e.target.value })}
-                                        className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono"
-                                        placeholder="Enter Access Key or Datafeed Token"
-                                    />
-                                    <button
-                                        onClick={() => togglePassword('accesstrade')}
-                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-blue-300 hover:text-white"
-                                    >
-                                        {showPasswords.accesstrade ? '👁️' : '👁️‍🗨️'}
-                                    </button>
-                                </div>
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium text-blue-200 mb-2">
-                                    Secret Key
-                                </label>
-                                <div className="relative">
-                                    <input
-                                        type={showPasswords.accesstrade_secret ? 'text' : 'password'}
-                                        value={settings.accesstrade_secret_key}
-                                        onChange={(e) => setSettings({ ...settings, accesstrade_secret_key: e.target.value })}
-                                        className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono"
-                                        placeholder="Enter AccessTrade Secret Key"
-                                    />
-                                    <button
-                                        onClick={() => togglePassword('accesstrade_secret')}
-                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-blue-300 hover:text-white"
-                                    >
-                                        {showPasswords.accesstrade_secret ? '👁️' : '👁️‍🗨️'}
-                                    </button>
-                                </div>
-                                <p className="text-xs text-blue-300 mt-1">
-                                    (Optional) เว้นว่างไว้ถ้าบัญชีของคุณมีแค่ Access Key / Token เดียว
-                                </p>
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium text-blue-200 mb-2">
-                                    API URL (Optional)
-                                </label>
-                                <input
-                                    type="text"
-                                    value={settings.accesstrade_api_url}
-                                    onChange={(e) => setSettings({ ...settings, accesstrade_api_url: e.target.value })}
-                                    className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono"
-                                    placeholder="https://api.accesstrade.in.th/v1/datafeeds"
-                                />
-                            </div>
-                        </div>
-                    </div>
 
                     {/* Passio Configuration */}
                     <div className="bg-white/10 backdrop-blur-lg rounded-xl p-6 border border-white/20">

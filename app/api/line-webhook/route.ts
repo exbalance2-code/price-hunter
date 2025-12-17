@@ -3,7 +3,6 @@ import { Client, WebhookEvent, FlexBubble } from '@line/bot-sdk';
 // import { searchProducts } from '@/lib/scraper';
 
 import { searchShopeeProducts } from '@/lib/shopee-client';
-import { searchAccessTradeProducts } from '@/lib/accesstrade-client';
 import { convertToAffiliateLink } from '@/lib/affiliate';
 import { logSearch, logClick } from '@/lib/analytics';
 
@@ -72,19 +71,13 @@ export async function POST(req: Request) {
                 let bestProducts: any[] = [];
 
                 try {
-                    console.log('Searching via Shopee API & AccessTrade...');
+                    console.log('Searching via Shopee API...');
 
-                    // Run searches in parallel
-                    const [shopeeResult, accessTradeResult] = await Promise.allSettled([
-                        searchShopeeProducts(userMessage, 10),
-                        searchAccessTradeProducts(userMessage, 10)
-                    ]);
+                    // Search Shopee only
+                    const shopeeItems = await searchShopeeProducts(userMessage, 10);
 
-                    const shopeeItems = shopeeResult.status === 'fulfilled' ? shopeeResult.value : [];
-                    const atItems = accessTradeResult.status === 'fulfilled' ? accessTradeResult.value : [];
-
-                    // Format Shopee
-                    const formattedShopee = shopeeItems.map((p: any) => ({
+                    // Format results
+                    bestProducts = shopeeItems.map(p => ({
                         title: p.name,
                         price: p.price,
                         image: p.imageUrl,
@@ -92,25 +85,6 @@ export async function POST(req: Request) {
                         sold: p.sold || 0,
                         platform: 'shopee'
                     }));
-
-                    // Format AccessTrade
-                    const formattedAT = atItems.map((p: any) => ({
-                        title: p.title,
-                        price: p.price,
-                        image: p.image,
-                        link: p.link,
-                        sold: p.sold || 0,
-                        platform: (p.merchant || '').toLowerCase().includes('lazada') ? 'lazada' : 'accesstrade'
-                    }));
-
-                    // Merge and Shuffle/Interleave or just append?
-                    // Let's interleave them to show variety
-                    bestProducts = [];
-                    const maxLength = Math.max(formattedShopee.length, formattedAT.length);
-                    for (let i = 0; i < maxLength; i++) {
-                        if (i < formattedShopee.length) bestProducts.push(formattedShopee[i]);
-                        if (i < formattedAT.length) bestProducts.push(formattedAT[i]);
-                    }
 
                 } catch (e: any) {
                     console.error('API Search Failed:', e.message);
