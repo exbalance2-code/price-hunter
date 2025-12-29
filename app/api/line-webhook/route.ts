@@ -59,13 +59,9 @@ export async function POST(req: Request) {
                 const userMessage = event.message.text.trim();
                 const userId = event.source.userId;
 
-                // 1. ตอบกลับทันทีว่ากำลังค้นหา
-                if (event.replyToken && event.replyToken !== '00000000000000000000000000000000') {
-                    await client.replyMessage(event.replyToken, {
-                        type: 'text',
-                        text: `🔍 รอสักครู่กำลังค้นหาสินค้า "${userMessage}"`
-                    });
-                }
+                // 1. ตอบกลับทันทีว่ากำลังค้นหา - REMOVED to save replyToken for the actual result
+                // We cannot reply twice with the same token, and pushMessage has rate limits.
+                // So we will just process silently and reply with the results.
 
                 // 2. ทำงานเบื้องหลัง (Search Process)
                 let bestProducts: any[] = [];
@@ -135,7 +131,7 @@ export async function POST(req: Request) {
                             return { ...p, link: trackingLink };
                         });
 
-                        await client.pushMessage(userId, {
+                        await client.replyMessage(event.replyToken, {
                             type: 'flex',
                             altText: `ผลการค้นหา: ${userMessage}`,
                             contents: {
@@ -144,7 +140,7 @@ export async function POST(req: Request) {
                             }
                         });
                     } else {
-                        await client.pushMessage(userId, {
+                        await client.replyMessage(event.replyToken, {
                             type: 'text',
                             text: 'ไม่พบสินค้าเลยครับ ลองค้นหาอีกครั้ง'
                         });
