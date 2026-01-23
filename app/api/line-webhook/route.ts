@@ -3,6 +3,7 @@ import { Client, WebhookEvent, FlexBubble } from '@line/bot-sdk';
 // import { searchProducts } from '@/lib/scraper';
 
 import { searchShopeeProducts } from '@/lib/shopee-client';
+import { LazadaClient } from '@/lib/lazada-client';
 import { convertToAffiliateLink } from '@/lib/affiliate';
 import { logSearch, logClick } from '@/lib/analytics';
 
@@ -59,21 +60,27 @@ export async function POST(req: Request) {
                 const userMessage = event.message.text.trim();
                 const userId = event.source.userId;
 
-                // 1. ตอบกลับทันทีว่ากำลังค้นหา - REMOVED to save replyToken for the actual result
-                // We cannot reply twice with the same token, and pushMessage has rate limits.
-                // So we will just process silently and reply with the results.
-
                 // 2. ทำงานเบื้องหลัง (Search Process)
                 let bestProducts: any[] = [];
+                const searchLimit = 5;
 
                 try {
-                    console.log('Searching via Shopee API...');
+                    console.log(`Searching for: ${userMessage}`);
 
-                    // Search Shopee only
-                    const shopeeItems = await searchShopeeProducts(userMessage, 5);
+                    // Parallel Search: Shopee & Lazada
+                    const [shopeeItems, lazadaItems] = await Promise.all([
+                        searchShopeeProducts(userMessage, searchLimit).catch(e => {
+                            console.error('Shopee Search Failed:', e);
+                            return [];
+                        }),
+                        LazadaClient.searchProducts(userMessage, searchLimit).catch(e => {
+                            console.error('Lazada Search Failed:', e);
+                            return [];
+                        })
+                    ]);
 
-                    // Format results
-                    bestProducts = shopeeItems.map(p => ({
+                    // Process Shopee Results
+                    const formattedShopee = shopeeItems.map(p => ({
                         title: p.name,
                         price: p.price,
                         image: p.imageUrl,
@@ -82,13 +89,40 @@ export async function POST(req: Request) {
                         platform: 'shopee'
                     }));
 
+                    // Process Lazada Results
+                    // Note: We need to generate affiliate links for Lazada items individually if search didn't return them.
+                    const formattedLazadaPromise = lazadaItems.map(async p => {
+                        const affLink = await LazadaClient.generateAffiliateLink(p.productLink);
+                        return {
+                            title: p.name,
+                            price: p.price,
+                            image: p.imageUrl,
+                            link: affLink,
+                            sold: p.sold || 0,
+                            platform: 'lazada'
+                        };
+                    });
+                    
+                    const formattedLazada = await Promise.all(formattedLazadaPromise);
+
+                    // Combine Results (Interleave or just append)
+                    // Let's mix them: Shopee1, Lazada1, Shopee2, Lazada2...
+                    const mixedResults = [];
+                    const maxLen = Math.max(formattedShopee.length, formattedLazada.length);
+                    for (let i = 0; i < maxLen; i++) {
+                        if (i < formattedShopee.length) mixedResults.push(formattedShopee[i]);
+                        if (i < formattedLazada.length) mixedResults.push(formattedLazada[i]);
+                    }
+                    
+                    bestProducts = mixedResults;
+
                 } catch (e: any) {
-                    console.error('API Search Failed:', e.message);
+                    console.error('Search Logic Failed:', e.message);
                 }
 
-                // Limit local results just in case
-                if (bestProducts.length > 5) {
-                    bestProducts.length = 5;
+                // Call to action: Limit total results for carousel (max 10 bubbles usually fine, line max is 10/12)
+                if (bestProducts.length > 10) {
+                    bestProducts.length = 10;
                 }
 
                 // Log search analytics
@@ -96,36 +130,24 @@ export async function POST(req: Request) {
 
                 if (userId) {
                     if (bestProducts.length > 0) {
-                        // ไม่ต้องแปลง Affiliate ตรงนี้ และไม่ต้อง Log Click ตรงนี้แล้ว
-                        // เราจะสร้าง Tracking URL แทน
+                        
+                        // Base URL for internal tracking (if needed)
+                        let baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
 
-                        // หา Base URL (ควรมาจาก ENV เพื่อความถูกต้องเมื่ออยู่บน Production)
-                        // แต่ถ้าไม่มีลองเดาจาก Host header (อาจจะไม่เวิร์คถ้าผ่าน proxy/ngrok แบบไม่ forward host)
-                        let baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
-                        if (!baseUrl) {
-                            // Fallback for dev (ngrok) - User need to set this!
-                            baseUrl = 'http://localhost:3000';
-                            console.warn('⚠️ No NEXT_PUBLIC_BASE_URL set. Using localhost. Clicks might fail outside local.');
-                        }
-                        // แต่เดี๋ยวก่อน! ถ้าใช้ ngrok คุณต้องแก้ baseUrl เป็น https://...ngrok... ด้วย
-                        // ไม่งั้น User กด link แล้วจะเข้า localhost ไม่ได้ (ถ้ากดจากมือถือ)
-
+                        // Apply internal tracking wrapper if desired
                         const productsWithTracking = bestProducts.map((p: any) => {
-                            // original link
+                            // original (affiliate) link
                             const originalLink = p.link;
 
-                            // สร้าง Tracking URL
-                            // format: /api/click?url=...&title=...&price=...&query=...
+                            // Create Tracking URL (Optional, but keeps consistency with existing logic)
                             const params = new URLSearchParams({
                                 url: originalLink,
-                                title: (p.title || '').substring(0, 50), // Truncate to avoid URL overflow (LINE limit 1000 chars)
+                                title: (p.title || '').substring(0, 50),
                                 price: (p.price || 0).toString(),
-                                query: userMessage
+                                query: userMessage,
+                                platform: p.platform // Add platform param for analytics
                             });
 
-                            // ถ้า baseUrl มี https://... แล้วก็ต่อได้เลย
-                            // กรณีไม่ได้ set เราจะลองใช้ path relative ไม่ได้เพราะ LINE ต้องการ Full URL
-                            // ดังนั้น *จำเป็น* ต้องมี Base URL ที่ถูกต้อง
                             const trackingLink = `${baseUrl}/api/click?${params.toString()}`;
 
                             return { ...p, link: trackingLink };
@@ -164,6 +186,11 @@ function createBubble(product: any): FlexBubble {
     // LINE requires HTTPS for images
     let imageUrl = product.image || 'https://via.placeholder.com/300?text=No+Image';
     if (!imageUrl.startsWith('https')) {
+        // Try to fix HTTP to HTTPS if possible, fast fix
+        imageUrl = imageUrl.replace('http://', 'https://');
+    }
+    // Final check
+    if (!imageUrl.startsWith('https')) {
         imageUrl = 'https://via.placeholder.com/300?text=No+Image';
     }
 
@@ -172,6 +199,11 @@ function createBubble(product: any): FlexBubble {
 
     // Ensure price is formatted correctly
     const priceText = product.price ? `฿${product.price.toLocaleString()}` : '฿0';
+
+    // Theme Colors
+    const isShopee = product.platform === 'shopee';
+    const themeColor = isShopee ? "#EE4D2D" : "#0f146e"; // Shopee Orange vs Lazada Blue
+    const platformName = isShopee ? "Shopee" : "Lazada";
 
     return {
         type: "bubble",
@@ -214,7 +246,7 @@ function createBubble(product: any): FlexBubble {
                         },
                         {
                             type: "text",
-                            text: product.sold > 0 ? `ขายแล้ว ${formatSold(product.sold)}` : ' ',
+                            text: platformName, // Show platform name instead of sold if sold is 0?
                             color: "#aaaaaa",
                             size: "xxs",
                             align: "end",
@@ -233,7 +265,7 @@ function createBubble(product: any): FlexBubble {
                 {
                     type: "button",
                     style: "primary",
-                    color: product.platform === 'shopee' ? "#EE4D2D" : "#101988", // Shopee Orange vs Lazada Blue
+                    color: themeColor,
                     height: "sm",
                     action: {
                         type: "uri",

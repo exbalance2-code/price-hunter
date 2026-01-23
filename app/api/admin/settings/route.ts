@@ -106,6 +106,7 @@ export async function GET(request: Request) {
             lazada_affiliate_key: process.env.LAZADA_AFFILIATE_KEY || '',
             lazada_app_key: process.env.LAZADA_APP_KEY || '',
             lazada_app_secret: process.env.LAZADA_APP_SECRET || '',
+            lazada_access_token: process.env.LAZADA_ACCESS_TOKEN || '',
             mysql_host: process.env.MYSQL_HOST || '',
             mysql_user: process.env.MYSQL_USER || '',
             mysql_password: process.env.MYSQL_PASSWORD || '',

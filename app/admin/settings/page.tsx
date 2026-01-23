@@ -12,6 +12,7 @@ interface Settings {
     lazada_affiliate_key: string;
     lazada_app_key: string;
     lazada_app_secret: string;
+    lazada_access_token: string;
     mysql_host: string;
     mysql_user: string;
     mysql_password: string;
@@ -30,6 +31,7 @@ export default function AdminSettings() {
         lazada_affiliate_key: '',
         lazada_app_key: '',
         lazada_app_secret: '',
+        lazada_access_token: '',
         mysql_host: '',
         mysql_user: '',
         mysql_password: '',
@@ -317,6 +319,27 @@ export default function AdminSettings() {
                                         className="absolute right-3 top-1/2 -translate-y-1/2 text-blue-300 hover:text-white"
                                     >
                                         {showPasswords.lazada_secret ? '👁️' : '👁️‍🗨️'}
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div className="mt-4">
+                                <label className="block text-sm font-medium text-blue-200 mb-2">
+                                    Access Token (User Token)
+                                </label>
+                                <div className="relative">
+                                    <input
+                                        type={showPasswords.lazada_token ? 'text' : 'password'}
+                                        value={settings.lazada_access_token}
+                                        onChange={(e) => setSettings({ ...settings, lazada_access_token: e.target.value })}
+                                        className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        placeholder="Enter Lazada Access Token"
+                                    />
+                                    <button
+                                        onClick={() => togglePassword('lazada_token')}
+                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-blue-300 hover:text-white"
+                                    >
+                                        {showPasswords.lazada_token ? '👁️' : '👁️‍🗨️'}
                                     </button>
                                 </div>
                             </div>
