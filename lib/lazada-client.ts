@@ -113,19 +113,21 @@ export class LazadaClient {
 
         try {
             const finalUrl = `${LAZADA_API_URL}${endpoint}`;
-            console.log(`[Lazada] Requesting: ${finalUrl}`);
+            console.log(`[Lazada] Requesting (POST): ${finalUrl}`);
             
-            const response = await axios.get(finalUrl, { params });
+            // Lazada API typically expects parameters in the Query String even for POST requests,
+            // or a mix. Safe bet is sending them as params (Query String).
+            const response = await axios.post(finalUrl, null, { params });
 
             // Normalize response
             const data = response.data;
             
             if (data.code !== '0') {
-                 console.error('Lazada API Error Code:', data.code, data.message);
+                 console.error('Lazada API Error:', JSON.stringify(data));
                  return [];
             }
 
-            const productsRaw = data.data?.result?.products || []; // Adjust based on actual JSON structure
+            const productsRaw = data.data?.result?.products || data.data?.products || []; 
 
             return productsRaw.map((item: any) => ({
                 itemId: item.itemId || item.product_id, // varies
@@ -167,7 +169,8 @@ export class LazadaClient {
         params['sign'] = signRequest(appSecret, endpoint, params);
 
         try {
-            const response = await axios.get(`${LAZADA_API_URL}${endpoint}`, { params });
+            console.log(`[Lazada] Generating Link (POST): ${LAZADA_API_URL}${endpoint}`);
+            const response = await axios.post(`${LAZADA_API_URL}${endpoint}`, null, { params });
             const data = response.data;
 
             if (data.code === '0' && data.data) {
