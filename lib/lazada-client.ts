@@ -4,7 +4,6 @@ import { query } from '@/lib/db';
 import { decrypt } from '@/lib/encryption';
 
 const LAZADA_API_URL = 'https://api.lazada.co.th/rest';
-// const LAZADA_API_URL = 'https://api.lazada.com/rest';
 
 export interface LazadaProduct {
     itemId: string;
@@ -13,13 +12,13 @@ export interface LazadaProduct {
     imageUrl: string;
     productLink: string;
     discount?: string;
-    sold?: number; // Lazada API might treat this differently, often "review" count or similar if sold not available
+    sold?: number; 
 }
 
 async function getLazadaCredentials() {
-    let appKey = process.env.LAZADA_APP_KEY || ''; // LiteApp Key
-    let appSecret = process.env.LAZADA_APP_SECRET || ''; // LiteApp Secret
-    let accessToken = process.env.LAZADA_ACCESS_TOKEN || ''; // User Token
+    let appKey = process.env.LAZADA_APP_KEY || ''; 
+    let appSecret = process.env.LAZADA_APP_SECRET || ''; 
+    let accessToken = process.env.LAZADA_ACCESS_TOKEN || ''; 
 
     if (!appKey || !appSecret) {
         try {
@@ -40,21 +39,11 @@ async function getLazadaCredentials() {
 }
 
 function signRequest(secret: string, apiPath: string, params: Record<string, any>): string {
-    // 1. Sort all parameters (system + application)
     const keys = Object.keys(params).sort();
-
-    // 2. Concatenate keys and values
-    // Logic from Python SDK (lazop/base.py):
-    // parameters_str = "%s%s" % (api, str().join('%s%s' % (key, parameters[key]) for key in sort_dict))
-    // So it MUST start with apiPath
-    
     let strToSign = apiPath;
-    
     for (const key of keys) {
         strToSign += key + params[key];
     }
-
-    // 3. HMAC-SHA256
     const hmac = crypto.createHmac('sha256', secret);
     hmac.update(strToSign);
     return hmac.digest('hex').toUpperCase();
@@ -63,81 +52,61 @@ function signRequest(secret: string, apiPath: string, params: Record<string, any
 export class LazadaClient {
     
     static async searchProducts(keyword: string, limit: number = 5): Promise<LazadaProduct[]> {
-        const { appKey, appSecret, accessToken } = await getLazadaCredentials();
+        const { appKey, appSecret } = await getLazadaCredentials();
 
         if (!appKey || !appSecret) {
             console.warn('Missing Lazada App Key or Secret');
             return [];
         }
 
-        // DEBUG: Check which token is actually being used
-        if (accessToken) {
-            console.log(`[Lazada] Using Access Token: ${accessToken.substring(0, 5)}...******`);
-        } else {
-            console.error('[Lazada] No Access Token found!');
-        }
-
-        // DOCUMENTATION VERIFICATION:
-        // The user docs DO NOT list a '/marketing/product/search' endpoint.
-        // They only list '/marketing/product/feed'.
-        // We will test this endpoint to verify Authentication & Signature logic works.
-        // If this works, it proves we have access, but Lazada simply doesn't offer Search API for affiliates.
-        const endpoint = '/marketing/product/feed'; 
-        
-        // Python SDK behavior: str(int(round(time.time()))) + '000'
-        const timestamp = (Math.floor(Date.now() / 1000)).toString() + '000';
+        // Endpoint for Affiliate Search
+        const endpoint = '/affiliate/product/search'; 
+        const timestamp = Date.now().toString(); 
 
         const params: Record<string, any> = {
             app_key: appKey,
             timestamp: timestamp,
             sign_method: 'sha256',
-            offerType: '1', // Required by Feed API: 1 - Regular offer
-            // keywords: keyword, // Feed API does NOT support keyword search according to docs
-            // Lazada specific pagination
-            page: '1', // Feed uses 'page' not 'page_no'
-            limit: limit.toString(),
+            keywords: keyword,   
+            page_no: '1',        
+            page_size: limit.toString(),
         };
-        
-        if (accessToken) {
-            params['access_token'] = accessToken;
-        }
 
-        // Generate Signature
+        // Create Signature
         params['sign'] = signRequest(appSecret, endpoint, params);
 
         try {
-            const finalUrl = `${LAZADA_API_URL}${endpoint}`;
-            console.log(`[Lazada] Requesting (POST): ${finalUrl}`);
+            console.log(`[Lazada] Searching: ${keyword}`);
             
-            // Lazada API typically expects parameters in the Query String even for POST requests
-            const response = await axios.post(finalUrl, null, { params });
+            // Log the request for debugging
+            console.log(`[Lazada] Request URL: ${LAZADA_API_URL}${endpoint}`);
+            
+            const response = await axios.get(`${LAZADA_API_URL}${endpoint}`, { params });
 
-            // Normalize response
             const data = response.data;
             
             if (data.code !== '0') {
                  console.error('Lazada API Error:', JSON.stringify(data));
-                 // If 'InvalidApiPath', it means search is not supported or path is wrong.
                  return [];
             }
 
-            const productsRaw = data.data || []; // Feed API returns data as a list directly? Or data.data? Docs say Response Fields directly. Usually data:{ ... } or data: [...]
-            // Sample response structure based on docs: { data: [ { productId, productName, ... } ] }
-            // Let's assume data.data is the array or data is the array.
-            
-            const list = Array.isArray(data.data) ? data.data : (data.data?.products || []);
+            const products = data.data?.products || [];
 
-            return list.map((item: any) => ({
+            return products.map((item: any) => ({
                 itemId: item.itemId || item.productId, 
                 name: item.productName || item.title,
-                price: parseFloat(item.price || item.origPrice || item.discountPrice || '0'), 
-                imageUrl: item.pictures?.[0] || item.imageUrl || item.mainImage, 
-                productLink: item.productUrl || item.itemUrl || `https://www.lazada.co.th/products/-i${item.productId}.html`, // Construct URL if missing
+                price: parseFloat(item.price || item.origPrice || '0'), 
+                imageUrl: item.imageUrl || item.image_url || (item.images ? item.images[0] : ''), 
+                productLink: item.productUrl || item.url, 
                 sold: 0
             }));
 
         } catch (error: any) {
              console.error('Lazada Search API Error:', error.message);
+             // Log full error response if available
+             if (error.response) {
+                 console.error('Lazada Error Response:', JSON.stringify(error.response.data));
+             }
              return [];
         }
     }
@@ -147,16 +116,14 @@ export class LazadaClient {
         
         if (!appKey || !appSecret) return originalUrl;
 
-        // Use documented endpoint: /marketing/getlink
-        const endpoint = '/marketing/getlink';
-        const timestamp = (Math.floor(Date.now() / 1000)).toString() + '000';
+        const endpoint = '/affiliate/link/generate';
+        const timestamp = Date.now().toString();
 
-         const params: Record<string, any> = {
+        const params: Record<string, any> = {
             app_key: appKey,
             timestamp: timestamp,
             sign_method: 'sha256',
-            inputType: 'url',
-            inputValue: originalUrl,
+            sourceUrl: originalUrl, 
         };
 
         if (accessToken) {
@@ -166,28 +133,20 @@ export class LazadaClient {
         params['sign'] = signRequest(appSecret, endpoint, params);
 
         try {
-            console.log(`[Lazada] Generating Link (POST): ${LAZADA_API_URL}${endpoint}`);
-            const response = await axios.post(`${LAZADA_API_URL}${endpoint}`, null, { params });
+            console.log(`[Lazada] Generating Link for: ${originalUrl}`);
+            const response = await axios.get(`${LAZADA_API_URL}${endpoint}`, { params });
             const data = response.data;
 
             if (data.code === '0' && data.data) {
-                // Response format for /marketing/getlink (url input)
-                // data: { urlBatchGetLinkInfoList: [ { originalUrl, regularPromotionLink, ... } ] }
-                // OR might be simpler. Let's check structure.
-                // The doc says: "urlBatchGetLinkInfoList": ...
-                
-                const list = data.data?.urlBatchGetLinkInfoList;
-                if (list && list.length > 0) {
-                    return list[0].regularPromotionLink || originalUrl;
-                }
-                
-                // Fallback for other response types
                 return data.data.shortLink || data.data.weblink || originalUrl;
             } else {
                  console.error('Lazada Link Gen Error:', JSON.stringify(data));
             }
         } catch (e: any) {
             console.error('Lazada Link Gen Failed:', e.message);
+             if (e.response) {
+                 console.error('Lazada Error Response:', JSON.stringify(e.response.data));
+             }
         }
 
         return originalUrl;
