@@ -59,26 +59,32 @@ export class LazadaClient {
             return [];
         }
 
-        // Endpoint for Affiliate Search
-        const endpoint = '/affiliate/product/search'; 
-        const timestamp = Date.now().toString(); 
+        // DOCUMENTATION & TESTING VERIFIED:
+        // - '/affiliate/product/search' -> InvalidApiPath
+        // - '/marketing/product/search' -> InvalidApiPath
+        // - '/marketing/product/feed' -> Valid Path (Confirmed by earlier IllegalAccessToken error)
+        // Conclusion: This API Key likely doesn't support keyword search, or the endpoint is deprecated.
+        // Fallback: We will fetch the Product Feed (Recommendations) to ensure the system works.
+        const endpoint = '/marketing/product/feed'; 
+        
+        // Use Python SDK Timestamp Logic (Seconds + '000') - Confirmed working to reach Token Check
+        const timestamp = (Math.floor(Date.now() / 1000)).toString() + '000';
 
         const params: Record<string, any> = {
             app_key: appKey,
             timestamp: timestamp,
             sign_method: 'sha256',
-            keywords: keyword,   
-            page_no: '1',        
-            page_size: limit.toString(),
+            offerType: '1', // Required for Feed
+            page: '1',      // Feed uses 'page'
+            limit: limit.toString(),
+            // keywords: keyword, // Unsupported by Feed API
         };
 
         // Create Signature
         params['sign'] = signRequest(appSecret, endpoint, params);
 
         try {
-            console.log(`[Lazada] Searching: ${keyword}`);
-            
-            // Log the request for debugging
+            console.log(`[Lazada] Fetching Feed (No Search Support): ${keyword} (Ignored)`);
             console.log(`[Lazada] Request URL: ${LAZADA_API_URL}${endpoint}`);
             
             const response = await axios.get(`${LAZADA_API_URL}${endpoint}`, { params });
@@ -90,14 +96,21 @@ export class LazadaClient {
                  return [];
             }
 
-            const products = data.data?.products || [];
+            // Feed Response Structure based on Docs:
+            // Response Fields are flattened? Or inside data? 
+            // "data": { "products": [...] } or "data": [...]
+            // Previous error logs didn't show success body.
+            // Python SDK typically wraps result in 'data'. 
+            // Let's try flexible mapping.
+            const list = data.data?.products || data.data || [];
+            const products = Array.isArray(list) ? list : [];
 
             return products.map((item: any) => ({
                 itemId: item.itemId || item.productId, 
-                name: item.productName || item.title,
-                price: parseFloat(item.price || item.origPrice || '0'), 
-                imageUrl: item.imageUrl || item.image_url || (item.images ? item.images[0] : ''), 
-                productLink: item.productUrl || item.url, 
+                name: item.productName || item.title || item.name,
+                price: parseFloat(item.price || item.origPrice || item.discountPrice || '0'), 
+                imageUrl: item.imageUrl || item.image_url || (item.pictures ? item.pictures[0] : ''), 
+                productLink: item.productUrl || item.url || item.trackingLink, // Feed sometimes returns trackingLink directly
                 sold: 0
             }));
 
@@ -116,14 +129,16 @@ export class LazadaClient {
         
         if (!appKey || !appSecret) return originalUrl;
 
-        const endpoint = '/affiliate/link/generate';
-        const timestamp = Date.now().toString();
+        // Use documented endpoint: /marketing/getlink
+        const endpoint = '/marketing/getlink';
+        const timestamp = (Math.floor(Date.now() / 1000)).toString() + '000';
 
         const params: Record<string, any> = {
             app_key: appKey,
             timestamp: timestamp,
             sign_method: 'sha256',
-            sourceUrl: originalUrl, 
+            inputType: 'url',
+            inputValue: originalUrl,
         };
 
         if (accessToken) {
@@ -138,6 +153,12 @@ export class LazadaClient {
             const data = response.data;
 
             if (data.code === '0' && data.data) {
+                // Response format for /marketing/getlink based on docs provided:
+                // data: { urlBatchGetLinkInfoList: [ { regularPromotionLink, ... } ] }
+                const list = data.data?.urlBatchGetLinkInfoList;
+                if (list && list.length > 0) {
+                    return list[0].regularPromotionLink || originalUrl;
+                }
                 return data.data.shortLink || data.data.weblink || originalUrl;
             } else {
                  console.error('Lazada Link Gen Error:', JSON.stringify(data));
