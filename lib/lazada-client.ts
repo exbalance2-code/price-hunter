@@ -52,7 +52,7 @@ function signRequest(secret: string, apiPath: string, params: Record<string, any
 export class LazadaClient {
     
     static async searchProducts(keyword: string, limit: number = 5): Promise<LazadaProduct[]> {
-        const { appKey, appSecret } = await getLazadaCredentials();
+        const { appKey, appSecret, accessToken } = await getLazadaCredentials(); // Destructure accessToken correctly
 
         if (!appKey || !appSecret) {
             console.warn('Missing Lazada App Key or Secret');
@@ -79,16 +79,25 @@ export class LazadaClient {
             limit: limit.toString(),
             // keywords: keyword, // Unsupported by Feed API
         };
+        
+        if (accessToken) {
+            // According to /marketing/ docs, 'userToken' is mandatory.
+            // We also keep 'access_token' as standard system param just in case, 
+            // but 'userToken' is what the error explicitly asked for.
+            params['userToken'] = accessToken;
+            params['access_token'] = accessToken;
+        }
 
-        // Create Signature
+        // Generate Signature
         params['sign'] = signRequest(appSecret, endpoint, params);
 
         try {
             console.log(`[Lazada] Fetching Feed (No Search Support): ${keyword} (Ignored)`);
             console.log(`[Lazada] Request URL: ${LAZADA_API_URL}${endpoint}`);
             
-            const response = await axios.get(`${LAZADA_API_URL}${endpoint}`, { params });
+            const response = await axios.post(`${LAZADA_API_URL}${endpoint}`, null, { params });
 
+            // Normalize response
             const data = response.data;
             
             if (data.code !== '0') {
@@ -96,13 +105,7 @@ export class LazadaClient {
                  return [];
             }
 
-            // Feed Response Structure based on Docs:
-            // Response Fields are flattened? Or inside data? 
-            // "data": { "products": [...] } or "data": [...]
-            // Previous error logs didn't show success body.
-            // Python SDK typically wraps result in 'data'. 
-            // Let's try flexible mapping.
-            const list = data.data?.products || data.data || [];
+            const list = data.data || []; 
             const products = Array.isArray(list) ? list : [];
 
             return products.map((item: any) => ({
@@ -110,7 +113,7 @@ export class LazadaClient {
                 name: item.productName || item.title || item.name,
                 price: parseFloat(item.price || item.origPrice || item.discountPrice || '0'), 
                 imageUrl: item.imageUrl || item.image_url || (item.pictures ? item.pictures[0] : ''), 
-                productLink: item.productUrl || item.url || item.trackingLink, // Feed sometimes returns trackingLink directly
+                productLink: item.productUrl || item.url || item.trackingLink,
                 sold: 0
             }));
 
@@ -142,6 +145,7 @@ export class LazadaClient {
         };
 
         if (accessToken) {
+             params['userToken'] = accessToken;
              params['access_token'] = accessToken;
         }
 
