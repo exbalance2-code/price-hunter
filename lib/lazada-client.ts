@@ -3,7 +3,8 @@ import crypto from 'crypto';
 import { query } from '@/lib/db';
 import { decrypt } from '@/lib/encryption';
 
-const LAZADA_API_URL = 'https://api.lazada.com/rest';
+const LAZADA_API_URL = 'https://api.lazada.co.th/rest';
+// const LAZADA_API_URL = 'https://api.lazada.com/rest';
 
 export interface LazadaProduct {
     itemId: string;
@@ -43,16 +44,26 @@ function signRequest(secret: string, apiPath: string, params: Record<string, any
     const keys = Object.keys(params).sort();
 
     // 2. Concatenate keys and values
-    let strToSign = apiPath; // In some Lazada SDKs, path is included? Let's check standard Open Platform.
-    // Standard V2: concatenated string of Path + key + value...
-    // But double check if path is needed. Most docs say:
-    // "concatenating the keys and values of all request parameters"
-    // Usually: key + value + key + value... 
-    // Wait, typical Lazada signature:
-    // sort params.
-    // string = apiName + key + value + key + value...
+    // Note: API Path usually is NOT included in the concatenation for Lazada standard V2 signature?
+    // Let's re-verify. Standard: key+value+key+value...
+    // Some SDKs might include it.
+    // Based on user "Literal HMAC-SHA256", usually it's just params.
+    // BUT Lazada docs say: "Concat all params... Add secret at head and tail (if MD5) or HMAC directly".
+    // For HMAC-SHA256: hmac(secret, sorted_params_string).
     
-    // Let's assume standard pattern: API Path + sorted params (key+value).
+    // Most Lazada Open Platform SDKs use: apiPath + key + value (for some algorithms) OR just key + value.
+    // Let's stick to key+value for now as it's most common for V2.
+    // Wait, let's try WITHOUT api path in signature if this fails authentication. but we are failing "InvalidApiPath" so authentication is not checked yet.
+    
+    let strToSign = "";
+    
+    // Add API Path to signature? Standard Lazada Open Platform usually Requires it first.
+    // strToSign = apiPath; 
+    // Let's try matching standardized behavior:
+    // Signature = HMAC-SHA256(Secret, API_Name + Sorted_Params)
+    // API_Name is usually the path e.g. /affiliate/product/search
+    
+    strToSign = apiPath; // Re-enable API path in signature just in case
     
     for (const key of keys) {
         strToSign += key + params[key];
@@ -74,7 +85,10 @@ export class LazadaClient {
             return [];
         }
 
-        const endpoint = '/affiliate/product/search';
+        // Try /service/... prefix if standard fails
+        const endpoint = '/service/affiliate/product/search'; 
+        // Or could be /affiliate/product/search without service
+        
         const timestamp = Date.now().toString();
 
         const params: Record<string, any> = {
@@ -98,11 +112,10 @@ export class LazadaClient {
         params['sign'] = signRequest(appSecret, endpoint, params);
 
         try {
-            console.log(`[Lazada] Searching for: ${keyword}`);
-            // Note: Axios params serializer might encode differently, so we should build query string manually or be careful if API expects strict encoding.
-            // Lazada usually accepts standard query params.
+            const finalUrl = `${LAZADA_API_URL}${endpoint}`;
+            console.log(`[Lazada] Requesting: ${finalUrl}`);
             
-            const response = await axios.get(`${LAZADA_API_URL}${endpoint}`, { params });
+            const response = await axios.get(finalUrl, { params });
 
             // Normalize response
             const data = response.data;
@@ -137,7 +150,7 @@ export class LazadaClient {
         
         if (!appKey || !appSecret) return originalUrl;
 
-        const endpoint = '/affiliate/link/generate';
+        const endpoint = '/service/affiliate/link/generate';
         const timestamp = Date.now().toString();
 
          const params: Record<string, any> = {
