@@ -3,7 +3,7 @@ import crypto from 'crypto';
 import { query } from '@/lib/db';
 import { decrypt } from '@/lib/encryption';
 
-const LAZADA_API_URL = 'https://api.lazada.co.th/rest';
+const LAZADA_API_URL = 'https://api.lazada.com/rest';
 
 export interface LazadaProduct {
     itemId: string;
