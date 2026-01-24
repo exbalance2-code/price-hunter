@@ -70,6 +70,13 @@ export class LazadaClient {
             return [];
         }
 
+        // DEBUG: Check which token is actually being used
+        if (accessToken) {
+            console.log(`[Lazada] Using Access Token: ${accessToken.substring(0, 5)}...******`);
+        } else {
+            console.error('[Lazada] No Access Token found!');
+        }
+
         // DOCUMENTATION VERIFICATION:
         // The user docs DO NOT list a '/marketing/product/search' endpoint.
         // They only list '/marketing/product/feed'.
