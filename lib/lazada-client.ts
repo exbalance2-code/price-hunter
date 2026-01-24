@@ -70,9 +70,10 @@ export class LazadaClient {
             return [];
         }
 
-        // Try /service/... prefix if standard fails
-        const endpoint = '/affiliate/product/search'; 
-        // Or could be /affiliate/product/search without service
+        // Based on user provided docs, the namespace is /marketing/
+        // Documented: /marketing/product/feed (List), /marketing/getlink (Gen Link)
+        // Guessing Search: /marketing/product/search (Common pattern)
+        const endpoint = '/marketing/product/search'; 
         
         // Python SDK behavior: str(int(round(time.time()))) + '000'
         const timestamp = (Math.floor(Date.now() / 1000)).toString() + '000';
@@ -81,16 +82,13 @@ export class LazadaClient {
             app_key: appKey,
             timestamp: timestamp,
             sign_method: 'sha256',
-            keywords: keyword,
+            keywords: keyword, // Assuming 'keywords' is the param name for search
             // Lazada specific pagination
             page_no: '1',
             page_size: limit.toString(),
-            // Optional: integration with access token if required for specific affiliate context?
-            // Usually search is public-ish but needs affiliate privileges.
         };
         
         if (accessToken) {
-            // Some endpoints require access_token, some don't. Affiliate usually uses it.
             params['access_token'] = accessToken;
         }
 
@@ -101,8 +99,7 @@ export class LazadaClient {
             const finalUrl = `${LAZADA_API_URL}${endpoint}`;
             console.log(`[Lazada] Requesting (POST): ${finalUrl}`);
             
-            // Lazada API typically expects parameters in the Query String even for POST requests,
-            // or a mix. Safe bet is sending them as params (Query String).
+            // Lazada API typically expects parameters in the Query String even for POST requests
             const response = await axios.post(finalUrl, null, { params });
 
             // Normalize response
@@ -110,21 +107,19 @@ export class LazadaClient {
             
             if (data.code !== '0') {
                  console.error('Lazada API Error:', JSON.stringify(data));
+                 // If 'InvalidApiPath', it means search is not supported or path is wrong.
                  return [];
             }
 
             const productsRaw = data.data?.result?.products || data.data?.products || []; 
 
             return productsRaw.map((item: any) => ({
-                itemId: item.itemId || item.product_id, // varies
-                name: item.productTitle || item.title,
+                itemId: item.itemId || item.product_id, 
+                name: item.productTitle || item.title || item.productName,
                 price: parseFloat(item.price || item.origPrice || '0'), 
-                // Note: item.price might be string.
-                imageUrl: item.imageUrl || item.mainImage,
+                imageUrl: item.imageUrl || item.mainImage || item.pictures?.[0], 
                 productLink: item.productUrl || item.itemUrl, 
-                // Lazada search might return affiliate link directly?
-                // Usually it returns 'itemUrl' (original).
-                sold: 0 // Search API rarely returns sold count accurately, maybe 'review' count?
+                sold: 0
             }));
 
         } catch (error: any) {
@@ -138,16 +133,16 @@ export class LazadaClient {
         
         if (!appKey || !appSecret) return originalUrl;
 
-        const endpoint = '/affiliate/link/generate';
-        // Python SDK behavior: str(int(round(time.time()))) + '000'
-        // This effectively sets the last 3 digits (milliseconds) to 000.
+        // Use documented endpoint: /marketing/getlink
+        const endpoint = '/marketing/getlink';
         const timestamp = (Math.floor(Date.now() / 1000)).toString() + '000';
 
          const params: Record<string, any> = {
             app_key: appKey,
             timestamp: timestamp,
             sign_method: 'sha256',
-            originUrl: originalUrl
+            inputType: 'url',
+            inputValue: originalUrl,
         };
 
         if (accessToken) {
@@ -162,10 +157,20 @@ export class LazadaClient {
             const data = response.data;
 
             if (data.code === '0' && data.data) {
-                // Usually returns 'weblink' (long) and 'shortLink' (short)
+                // Response format for /marketing/getlink (url input)
+                // data: { urlBatchGetLinkInfoList: [ { originalUrl, regularPromotionLink, ... } ] }
+                // OR might be simpler. Let's check structure.
+                // The doc says: "urlBatchGetLinkInfoList": ...
+                
+                const list = data.data?.urlBatchGetLinkInfoList;
+                if (list && list.length > 0) {
+                    return list[0].regularPromotionLink || originalUrl;
+                }
+                
+                // Fallback for other response types
                 return data.data.shortLink || data.data.weblink || originalUrl;
             } else {
-                 console.error('Lazada Link Gen Error:', data.message);
+                 console.error('Lazada Link Gen Error:', JSON.stringify(data));
             }
         } catch (e: any) {
             console.error('Lazada Link Gen Failed:', e.message);
