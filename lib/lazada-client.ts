@@ -44,26 +44,11 @@ function signRequest(secret: string, apiPath: string, params: Record<string, any
     const keys = Object.keys(params).sort();
 
     // 2. Concatenate keys and values
-    // Note: API Path usually is NOT included in the concatenation for Lazada standard V2 signature?
-    // Let's re-verify. Standard: key+value+key+value...
-    // Some SDKs might include it.
-    // Based on user "Literal HMAC-SHA256", usually it's just params.
-    // BUT Lazada docs say: "Concat all params... Add secret at head and tail (if MD5) or HMAC directly".
-    // For HMAC-SHA256: hmac(secret, sorted_params_string).
+    // Logic from Python SDK (lazop/base.py):
+    // parameters_str = "%s%s" % (api, str().join('%s%s' % (key, parameters[key]) for key in sort_dict))
+    // So it MUST start with apiPath
     
-    // Most Lazada Open Platform SDKs use: apiPath + key + value (for some algorithms) OR just key + value.
-    // Let's stick to key+value for now as it's most common for V2.
-    // Wait, let's try WITHOUT api path in signature if this fails authentication. but we are failing "InvalidApiPath" so authentication is not checked yet.
-    
-    let strToSign = "";
-    
-    // Add API Path to signature? Standard Lazada Open Platform usually Requires it first.
-    // strToSign = apiPath; 
-    // Let's try matching standardized behavior:
-    // Signature = HMAC-SHA256(Secret, API_Name + Sorted_Params)
-    // API_Name is usually the path e.g. /affiliate/product/search
-    
-    strToSign = apiPath; // Re-enable API path in signature just in case
+    let strToSign = apiPath;
     
     for (const key of keys) {
         strToSign += key + params[key];
@@ -89,7 +74,8 @@ export class LazadaClient {
         const endpoint = '/affiliate/product/search'; 
         // Or could be /affiliate/product/search without service
         
-        const timestamp = Date.now().toString();
+        // Python SDK behavior: str(int(round(time.time()))) + '000'
+        const timestamp = (Math.floor(Date.now() / 1000)).toString() + '000';
 
         const params: Record<string, any> = {
             app_key: appKey,
@@ -153,7 +139,9 @@ export class LazadaClient {
         if (!appKey || !appSecret) return originalUrl;
 
         const endpoint = '/affiliate/link/generate';
-        const timestamp = Date.now().toString();
+        // Python SDK behavior: str(int(round(time.time()))) + '000'
+        // This effectively sets the last 3 digits (milliseconds) to 000.
+        const timestamp = (Math.floor(Date.now() / 1000)).toString() + '000';
 
          const params: Record<string, any> = {
             app_key: appKey,
