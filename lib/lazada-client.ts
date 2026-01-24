@@ -86,7 +86,7 @@ export class LazadaClient {
         }
 
         // Try /service/... prefix if standard fails
-        const endpoint = '/service/affiliate/product/search'; 
+        const endpoint = '/affiliate/product/search'; 
         // Or could be /affiliate/product/search without service
         
         const timestamp = Date.now().toString();
@@ -150,7 +150,7 @@ export class LazadaClient {
         
         if (!appKey || !appSecret) return originalUrl;
 
-        const endpoint = '/service/affiliate/link/generate';
+        const endpoint = '/affiliate/link/generate';
         const timestamp = Date.now().toString();
 
          const params: Record<string, any> = {
