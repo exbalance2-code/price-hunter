@@ -70,10 +70,12 @@ export class LazadaClient {
             return [];
         }
 
-        // Based on user provided docs, the namespace is /marketing/
-        // Documented: /marketing/product/feed (List), /marketing/getlink (Gen Link)
-        // Guessing Search: /marketing/product/search (Common pattern)
-        const endpoint = '/marketing/product/search'; 
+        // DOCUMENTATION VERIFICATION:
+        // The user docs DO NOT list a '/marketing/product/search' endpoint.
+        // They only list '/marketing/product/feed'.
+        // We will test this endpoint to verify Authentication & Signature logic works.
+        // If this works, it proves we have access, but Lazada simply doesn't offer Search API for affiliates.
+        const endpoint = '/marketing/product/feed'; 
         
         // Python SDK behavior: str(int(round(time.time()))) + '000'
         const timestamp = (Math.floor(Date.now() / 1000)).toString() + '000';
@@ -82,10 +84,11 @@ export class LazadaClient {
             app_key: appKey,
             timestamp: timestamp,
             sign_method: 'sha256',
-            keywords: keyword, // Assuming 'keywords' is the param name for search
+            offerType: '1', // Required by Feed API: 1 - Regular offer
+            // keywords: keyword, // Feed API does NOT support keyword search according to docs
             // Lazada specific pagination
-            page_no: '1',
-            page_size: limit.toString(),
+            page: '1', // Feed uses 'page' not 'page_no'
+            limit: limit.toString(),
         };
         
         if (accessToken) {
@@ -111,14 +114,18 @@ export class LazadaClient {
                  return [];
             }
 
-            const productsRaw = data.data?.result?.products || data.data?.products || []; 
+            const productsRaw = data.data || []; // Feed API returns data as a list directly? Or data.data? Docs say Response Fields directly. Usually data:{ ... } or data: [...]
+            // Sample response structure based on docs: { data: [ { productId, productName, ... } ] }
+            // Let's assume data.data is the array or data is the array.
+            
+            const list = Array.isArray(data.data) ? data.data : (data.data?.products || []);
 
-            return productsRaw.map((item: any) => ({
-                itemId: item.itemId || item.product_id, 
-                name: item.productTitle || item.title || item.productName,
-                price: parseFloat(item.price || item.origPrice || '0'), 
-                imageUrl: item.imageUrl || item.mainImage || item.pictures?.[0], 
-                productLink: item.productUrl || item.itemUrl, 
+            return list.map((item: any) => ({
+                itemId: item.itemId || item.productId, 
+                name: item.productName || item.title,
+                price: parseFloat(item.price || item.origPrice || item.discountPrice || '0'), 
+                imageUrl: item.pictures?.[0] || item.imageUrl || item.mainImage, 
+                productLink: item.productUrl || item.itemUrl || `https://www.lazada.co.th/products/-i${item.productId}.html`, // Construct URL if missing
                 sold: 0
             }));
 
