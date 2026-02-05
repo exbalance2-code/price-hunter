@@ -34,7 +34,7 @@ function getDatabaseUrl() {
 }
 
 export default defineConfig({
-  datasources: {
+  datasource: {
     db: {
       url: getDatabaseUrl(),
     },
