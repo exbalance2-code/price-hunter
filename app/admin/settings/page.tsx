@@ -21,6 +21,23 @@ interface Settings {
     passio_api_url: string;
 }
 
+interface SettingField {
+    key: keyof Settings;
+    label: string;
+    type: 'text' | 'password';
+    placeholder: string;
+    passwordKey?: string;
+    mono?: boolean;
+}
+
+interface SettingSection {
+    title: string;
+    icon: string;
+    color: string;
+    fields: SettingField[];
+    grid?: boolean;
+}
+
 export default function AdminSettings() {
     const [settings, setSettings] = useState<Settings>({
         line_channel_access_token: '',
@@ -53,7 +70,6 @@ export default function AdminSettings() {
     const [message, setMessage] = useState('');
     const [error, setError] = useState('');
 
-    // Load settings
     useEffect(() => {
         loadSettings();
     }, []);
@@ -66,7 +82,7 @@ export default function AdminSettings() {
                 const data = await response.json();
                 setSettings(data.settings);
             }
-        } catch (err) {
+        } catch {
             setError('ไม่สามารถโหลดการตั้งค่าได้');
         } finally {
             setLoading(false);
@@ -86,13 +102,13 @@ export default function AdminSettings() {
             });
 
             if (response.ok) {
-                setMessage('✅ บันทึกการตั้งค่าสำเร็จ');
+                setMessage('บันทึกการตั้งค่าสำเร็จ');
                 setTimeout(() => setMessage(''), 3000);
             } else {
-                setError('❌ ไม่สามารถบันทึกได้');
+                setError('ไม่สามารถบันทึกได้');
             }
-        } catch (err) {
-            setError('❌ เกิดข้อผิดพลาด');
+        } catch {
+            setError('เกิดข้อผิดพลาด');
         } finally {
             setSaving(false);
         }
@@ -118,19 +134,14 @@ export default function AdminSettings() {
             const data = await response.json();
 
             if (response.ok) {
-                setMessage(`✅ เปลี่ยนข้อมูลสำเร็จ${data.newUsername ? ` (Username: ${data.newUsername})` : ''}`);
-                setCredentials({
-                    currentPassword: '',
-                    newUsername: '',
-                    newPassword: '',
-                    confirmPassword: '',
-                });
+                setMessage(`เปลี่ยนข้อมูลสำเร็จ${data.newUsername ? ` (Username: ${data.newUsername})` : ''}`);
+                setCredentials({ currentPassword: '', newUsername: '', newPassword: '', confirmPassword: '' });
                 setTimeout(() => setMessage(''), 5000);
             } else {
-                setError(`❌ ${data.error || 'ไม่สามารถเปลี่ยนได้'}`);
+                setError(data.error || 'ไม่สามารถเปลี่ยนได้');
             }
-        } catch (err) {
-            setError('❌ เกิดข้อผิดพลาด');
+        } catch {
+            setError('เกิดข้อผิดพลาด');
         } finally {
             setSaving(false);
         }
@@ -140,385 +151,259 @@ export default function AdminSettings() {
         setShowPasswords(prev => ({ ...prev, [field]: !prev[field] }));
     };
 
+    const sections: SettingSection[] = [
+        {
+            title: 'LINE Bot Configuration',
+            icon: '📱',
+            color: 'from-green-500 to-emerald-500',
+            fields: [
+                { key: 'line_channel_access_token', label: 'Channel Access Token', type: 'password', placeholder: '••••••••', passwordKey: 'line_token' },
+                { key: 'line_channel_secret', label: 'Channel Secret', type: 'password', placeholder: '••••••••', passwordKey: 'line_secret' },
+            ],
+        },
+        {
+            title: 'Shopee Configuration',
+            icon: '🛒',
+            color: 'from-orange-500 to-red-500',
+            fields: [
+                { key: 'shopee_app_id', label: 'App ID', type: 'text', placeholder: 'Enter Shopee App ID' },
+                { key: 'shopee_api_secret', label: 'API Secret', type: 'password', placeholder: '••••••••', passwordKey: 'shopee_secret' },
+                { key: 'shopee_affiliate_key', label: 'Affiliate Key', type: 'password', placeholder: '••••••••', passwordKey: 'shopee_affiliate' },
+            ],
+        },
+        {
+            title: 'Lazada Configuration',
+            icon: '🛍️',
+            color: 'from-blue-500 to-indigo-500',
+            fields: [
+                { key: 'lazada_affiliate_key', label: 'Affiliate Key', type: 'password', placeholder: '••••••••', passwordKey: 'lazada' },
+                { key: 'lazada_app_key', label: 'App Key', type: 'text', placeholder: 'Enter Lazada App Key' },
+                { key: 'lazada_app_secret', label: 'App Secret', type: 'password', placeholder: '••••••••', passwordKey: 'lazada_secret' },
+                { key: 'lazada_access_token', label: 'Access Token', type: 'password', placeholder: 'Enter Lazada Access Token', passwordKey: 'lazada_token' },
+            ],
+        },
+        {
+            title: 'Passio / Ecomobi',
+            icon: '🔌',
+            color: 'from-purple-500 to-violet-500',
+            fields: [
+                { key: 'passio_api_token', label: 'API Token', type: 'password', placeholder: 'Enter your Passio API Token', passwordKey: 'passio', mono: true },
+                { key: 'passio_api_url', label: 'API URL (Optional)', type: 'text', placeholder: 'https://ga.passio.eco/api/v3', mono: true },
+            ],
+        },
+        {
+            title: 'Database Configuration',
+            icon: '💾',
+            color: 'from-cyan-500 to-blue-500',
+            grid: true,
+            fields: [
+                { key: 'mysql_host', label: 'Host', type: 'text', placeholder: 'localhost' },
+                { key: 'mysql_database', label: 'Database', type: 'text', placeholder: 'price_hunter' },
+                { key: 'mysql_user', label: 'User', type: 'text', placeholder: 'root' },
+                { key: 'mysql_password', label: 'Password', type: 'password', placeholder: '••••••••', passwordKey: 'mysql' },
+            ],
+        },
+    ];
+
     if (loading) {
         return (
-            <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 flex items-center justify-center">
-                <div className="text-white text-xl">กำลังโหลด...</div>
+            <div className="min-h-screen bg-slate-950 flex items-center justify-center">
+                <div className="text-center">
+                    <div className="w-12 h-12 border-4 border-blue-500/30 border-t-blue-500 rounded-full animate-spin mx-auto mb-4" />
+                    <p className="text-white/60 text-sm">กำลังโหลดการตั้งค่า...</p>
+                </div>
             </div>
         );
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 p-6">
-            <div className="max-w-5xl mx-auto">
-                {/* Header */}
-                <div className="flex items-center justify-between mb-8">
-                    <div>
-                        <h1 className="text-3xl font-bold text-white mb-2">⚙️ การตั้งค่าระบบ</h1>
-                        <p className="text-blue-200">จัดการ API Keys, Database และข้อมูล Admin</p>
-                    </div>
-                    <Link
-                        href="/admin"
-                        className="px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-colors"
-                    >
-                        ← กลับ Dashboard
-                    </Link>
-                </div>
+        <div className="min-h-screen bg-slate-950 relative">
+            <div className="absolute inset-0 grid-pattern" />
+            <div className="floating-orb w-[400px] h-[400px] bg-blue-600/15 top-[-100px] right-[-100px]" />
+            <div className="floating-orb w-[300px] h-[300px] bg-purple-600/10 bottom-[20%] left-[-100px]" />
 
-                {/* Messages */}
-                {message && (
-                    <div className="mb-6 p-4 bg-green-500/20 border border-green-500/50 rounded-lg text-green-200">
-                        {message}
-                    </div>
-                )}
-                {error && (
-                    <div className="mb-6 p-4 bg-red-500/20 border border-red-500/50 rounded-lg text-red-200">
-                        {error}
-                    </div>
-                )}
-
-                <div className="space-y-6">
-                    {/* LINE Bot Configuration */}
-                    <div className="bg-white/10 backdrop-blur-lg rounded-xl p-6 border border-white/20">
-                        <h2 className="text-xl font-bold text-white mb-4">📱 LINE Bot Configuration</h2>
-                        <div className="space-y-4">
-                            <div>
-                                <label className="block text-sm font-medium text-blue-200 mb-2">
-                                    Channel Access Token
-                                </label>
-                                <div className="relative">
-                                    <input
-                                        type={showPasswords.line_token ? 'text' : 'password'}
-                                        value={settings.line_channel_access_token}
-                                        onChange={(e) => setSettings({ ...settings, line_channel_access_token: e.target.value })}
-                                        className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                        placeholder="••••••••"
-                                    />
-                                    <button
-                                        onClick={() => togglePassword('line_token')}
-                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-blue-300 hover:text-white"
-                                    >
-                                        {showPasswords.line_token ? '👁️' : '👁️‍🗨️'}
-                                    </button>
-                                </div>
-                            </div>
-
-                            <div>
-                                <label className="block text-sm font-medium text-blue-200 mb-2">
-                                    Channel Secret
-                                </label>
-                                <div className="relative">
-                                    <input
-                                        type={showPasswords.line_secret ? 'text' : 'password'}
-                                        value={settings.line_channel_secret}
-                                        onChange={(e) => setSettings({ ...settings, line_channel_secret: e.target.value })}
-                                        className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                        placeholder="••••••••"
-                                    />
-                                    <button
-                                        onClick={() => togglePassword('line_secret')}
-                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-blue-300 hover:text-white"
-                                    >
-                                        {showPasswords.line_secret ? '👁️' : '👁️‍🗨️'}
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Shopee Configuration */}
-                    <div className="bg-white/10 backdrop-blur-lg rounded-xl p-6 border border-white/20">
-                        <h2 className="text-xl font-bold text-white mb-4">🛒 Shopee Configuration</h2>
-                        <div className="space-y-4">
-                            <div>
-                                <label className="block text-sm font-medium text-blue-200 mb-2">
-                                    App ID
-                                </label>
-                                <input
-                                    type="text"
-                                    value={settings.shopee_app_id}
-                                    onChange={(e) => setSettings({ ...settings, shopee_app_id: e.target.value })}
-                                    className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                    placeholder="Enter Shopee App ID"
-                                />
-                            </div>
-
-                            <div>
-                                <label className="block text-sm font-medium text-blue-200 mb-2">
-                                    API Secret
-                                </label>
-                                <div className="relative">
-                                    <input
-                                        type={showPasswords.shopee_secret ? 'text' : 'password'}
-                                        value={settings.shopee_api_secret}
-                                        onChange={(e) => setSettings({ ...settings, shopee_api_secret: e.target.value })}
-                                        className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                        placeholder="••••••••"
-                                    />
-                                    <button
-                                        onClick={() => togglePassword('shopee_secret')}
-                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-blue-300 hover:text-white"
-                                    >
-                                        {showPasswords.shopee_secret ? '👁️' : '👁️‍🗨️'}
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Lazada Configuration */}
-                    <div className="bg-white/10 backdrop-blur-lg rounded-xl p-6 border border-white/20">
-                        <h2 className="text-xl font-bold text-white mb-4">🛍️ Lazada Configuration</h2>
+            <div className="relative z-10 p-4 lg:p-6">
+                <div className="max-w-7xl mx-auto">
+                    {/* Header */}
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 gap-4">
                         <div>
-                            <label className="block text-sm font-medium text-blue-200 mb-2">
-                                Affiliate Key
-                            </label>
-                            <div className="relative">
-                                <input
-                                    type={showPasswords.lazada ? 'text' : 'password'}
-                                    value={settings.lazada_affiliate_key}
-                                    onChange={(e) => setSettings({ ...settings, lazada_affiliate_key: e.target.value })}
-                                    className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                    placeholder="••••••••"
-                                />
+                            <h1 className="text-2xl lg:text-3xl font-extrabold text-white mb-1">การตั้งค่าระบบ</h1>
+                            <p className="text-white/40 text-sm">จัดการ API Keys, Database และข้อมูล Admin</p>
+                        </div>
+                        <Link
+                            href="/admin"
+                            className="glass-card px-4 py-2.5 text-white text-sm font-medium hover:bg-white/10 transition-all flex items-center gap-2"
+                        >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                            </svg>
+                            กลับ Dashboard
+                        </Link>
+                    </div>
+
+                    {/* Messages */}
+                    {message && (
+                        <div className="mb-6 glass-card p-4 bg-emerald-500/10 border-emerald-500/20 flex items-center gap-3">
+                            <svg className="w-5 h-5 text-emerald-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                            </svg>
+                            <span className="text-emerald-300 text-sm font-medium">{message}</span>
+                        </div>
+                    )}
+                    {error && (
+                        <div className="mb-6 glass-card p-4 bg-red-500/10 border-red-500/20 flex items-center gap-3">
+                            <svg className="w-5 h-5 text-red-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <span className="text-red-300 text-sm font-medium">{error}</span>
+                        </div>
+                    )}
+
+                    <div className="space-y-5">
+                        {/* Dynamic Sections */}
+                        {sections.map((section, sIndex) => (
+                            <div key={sIndex} className="glass-card p-6">
+                                <div className="flex items-center gap-3 mb-5">
+                                    <div className={`w-10 h-10 bg-gradient-to-br ${section.color} rounded-xl flex items-center justify-center text-lg shadow-lg`}>
+                                        {section.icon}
+                                    </div>
+                                    <h2 className="text-lg font-bold text-white">{section.title}</h2>
+                                </div>
+                                <div className={section.grid ? 'grid md:grid-cols-2 gap-4' : 'space-y-4'}>
+                                    {section.fields.map((field) => (
+                                        <div key={field.key}>
+                                            <label className="block text-xs font-medium text-white/50 mb-2 uppercase tracking-wide">
+                                                {field.label}
+                                            </label>
+                                            <div className="relative">
+                                                <input
+                                                    type={field.passwordKey && !showPasswords[field.passwordKey] ? 'password' : 'text'}
+                                                    value={settings[field.key]}
+                                                    onChange={(e) => setSettings({ ...settings, [field.key]: e.target.value })}
+                                                    className={`w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/20 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all text-sm ${field.mono ? 'font-mono' : ''}`}
+                                                    placeholder={field.placeholder}
+                                                />
+                                                {field.passwordKey && (
+                                                    <button
+                                                        onClick={() => togglePassword(field.passwordKey!)}
+                                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-white/30 hover:text-white/60 transition-colors"
+                                                    >
+                                                        {showPasswords[field.passwordKey] ? (
+                                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                                            </svg>
+                                                        ) : (
+                                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+                                                            </svg>
+                                                        )}
+                                                    </button>
+                                                )}
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        ))}
+
+                        {/* Save Settings Button */}
+                        <button
+                            onClick={handleSaveSettings}
+                            disabled={saving}
+                            className="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white font-bold py-4 rounded-2xl hover:from-blue-600 hover:to-purple-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-blue-500/20 hover:shadow-blue-500/30 text-sm"
+                        >
+                            {saving ? (
+                                <span className="flex items-center justify-center gap-2">
+                                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                    กำลังบันทึก...
+                                </span>
+                            ) : (
+                                '💾 บันทึกการตั้งค่า'
+                            )}
+                        </button>
+
+                        {/* Admin Credentials */}
+                        <div className="glass-card p-6">
+                            <div className="flex items-center gap-3 mb-5">
+                                <div className="w-10 h-10 bg-gradient-to-br from-amber-500 to-orange-500 rounded-xl flex items-center justify-center text-lg shadow-lg">
+                                    👤
+                                </div>
+                                <h2 className="text-lg font-bold text-white">เปลี่ยนข้อมูล Admin</h2>
+                            </div>
+                            <div className="space-y-4">
+                                <div>
+                                    <label className="block text-xs font-medium text-white/50 mb-2 uppercase tracking-wide">
+                                        รหัสผ่านปัจจุบัน <span className="text-red-400">*</span>
+                                    </label>
+                                    <input
+                                        type="password"
+                                        value={credentials.currentPassword}
+                                        onChange={(e) => setCredentials({ ...credentials, currentPassword: e.target.value })}
+                                        className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/20 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all text-sm"
+                                        placeholder="••••••••"
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="block text-xs font-medium text-white/50 mb-2 uppercase tracking-wide">
+                                        Username ใหม่ (ถ้าต้องการเปลี่ยน)
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={credentials.newUsername}
+                                        onChange={(e) => setCredentials({ ...credentials, newUsername: e.target.value })}
+                                        className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/20 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all text-sm"
+                                        placeholder="admin"
+                                    />
+                                </div>
+
+                                <div className="grid md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="block text-xs font-medium text-white/50 mb-2 uppercase tracking-wide">
+                                            รหัสผ่านใหม่
+                                        </label>
+                                        <input
+                                            type="password"
+                                            value={credentials.newPassword}
+                                            onChange={(e) => setCredentials({ ...credentials, newPassword: e.target.value })}
+                                            className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/20 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all text-sm"
+                                            placeholder="••••••••"
+                                        />
+                                        <p className="text-[10px] text-white/30 mt-1.5">
+                                            อย่างน้อย 8 ตัวอักษร, ตัวพิมพ์ใหญ่, ตัวพิมพ์เล็ก และตัวเลข
+                                        </p>
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-xs font-medium text-white/50 mb-2 uppercase tracking-wide">
+                                            ยืนยันรหัสผ่านใหม่
+                                        </label>
+                                        <input
+                                            type="password"
+                                            value={credentials.confirmPassword}
+                                            onChange={(e) => setCredentials({ ...credentials, confirmPassword: e.target.value })}
+                                            className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/20 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all text-sm"
+                                            placeholder="••••••••"
+                                        />
+                                    </div>
+                                </div>
+
                                 <button
-                                    onClick={() => togglePassword('lazada')}
-                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-blue-300 hover:text-white"
+                                    onClick={handleChangeCredentials}
+                                    disabled={saving || !credentials.currentPassword}
+                                    className="w-full bg-gradient-to-r from-emerald-500 to-green-600 text-white font-bold py-3.5 rounded-xl hover:from-emerald-600 hover:to-green-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-emerald-500/20 text-sm"
                                 >
-                                    {showPasswords.lazada ? '👁️' : '👁️‍🗨️'}
+                                    {saving ? (
+                                        <span className="flex items-center justify-center gap-2">
+                                            <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                            กำลังเปลี่ยน...
+                                        </span>
+                                    ) : (
+                                        '🔐 เปลี่ยนข้อมูล Admin'
+                                    )}
                                 </button>
                             </div>
-
-                            <div className="mt-4">
-                                <label className="block text-sm font-medium text-blue-200 mb-2">
-                                    App Key
-                                </label>
-                                <input
-                                    type="text"
-                                    value={settings.lazada_app_key}
-                                    onChange={(e) => setSettings({ ...settings, lazada_app_key: e.target.value })}
-                                    className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                    placeholder="Enter Lazada App Key"
-                                />
-                            </div>
-
-                            <div className="mt-4">
-                                <label className="block text-sm font-medium text-blue-200 mb-2">
-                                    App Secret
-                                </label>
-                                <div className="relative">
-                                    <input
-                                        type={showPasswords.lazada_secret ? 'text' : 'password'}
-                                        value={settings.lazada_app_secret}
-                                        onChange={(e) => setSettings({ ...settings, lazada_app_secret: e.target.value })}
-                                        className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                        placeholder="••••••••"
-                                    />
-                                    <button
-                                        onClick={() => togglePassword('lazada_secret')}
-                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-blue-300 hover:text-white"
-                                    >
-                                        {showPasswords.lazada_secret ? '👁️' : '👁️‍🗨️'}
-                                    </button>
-                                </div>
-                            </div>
-
-                            <div className="mt-4">
-                                <label className="block text-sm font-medium text-blue-200 mb-2">
-                                    Access Token (User Token)
-                                </label>
-                                <div className="relative">
-                                    <input
-                                        type={showPasswords.lazada_token ? 'text' : 'password'}
-                                        value={settings.lazada_access_token}
-                                        onChange={(e) => setSettings({ ...settings, lazada_access_token: e.target.value })}
-                                        className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                        placeholder="Enter Lazada Access Token"
-                                    />
-                                    <button
-                                        onClick={() => togglePassword('lazada_token')}
-                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-blue-300 hover:text-white"
-                                    >
-                                        {showPasswords.lazada_token ? '👁️' : '👁️‍🗨️'}
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-
-                    {/* Passio Configuration */}
-                    <div className="bg-white/10 backdrop-blur-lg rounded-xl p-6 border border-white/20">
-                        <h2 className="text-xl font-bold text-white mb-4">🔌 Passio / Ecomobi Configuration</h2>
-                        <div className="space-y-4">
-                            <div>
-                                <label className="block text-sm font-medium text-blue-200 mb-2">
-                                    API Token
-                                </label>
-                                <div className="relative">
-                                    <input
-                                        type={showPasswords.passio ? 'text' : 'password'}
-                                        value={settings.passio_api_token}
-                                        onChange={(e) => setSettings({ ...settings, passio_api_token: e.target.value })}
-                                        className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono"
-                                        placeholder="Enter your Passio API Token"
-                                    />
-                                    <button
-                                        onClick={() => togglePassword('passio')}
-                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-blue-300 hover:text-white"
-                                    >
-                                        {showPasswords.passio ? '👁️' : '👁️‍🗨️'}
-                                    </button>
-                                </div>
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium text-blue-200 mb-2">
-                                    API URL (Optional)
-                                </label>
-                                <input
-                                    type="text"
-                                    value={settings.passio_api_url}
-                                    onChange={(e) => setSettings({ ...settings, passio_api_url: e.target.value })}
-                                    className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono"
-                                    placeholder="https://ga.passio.eco/api/v3"
-                                />
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Database Configuration */}
-                    <div className="bg-white/10 backdrop-blur-lg rounded-xl p-6 border border-white/20">
-                        <h2 className="text-xl font-bold text-white mb-4">💾 Database Configuration</h2>
-                        <div className="grid md:grid-cols-2 gap-4">
-                            <div>
-                                <label className="block text-sm font-medium text-blue-200 mb-2">Host</label>
-                                <input
-                                    type="text"
-                                    value={settings.mysql_host}
-                                    onChange={(e) => setSettings({ ...settings, mysql_host: e.target.value })}
-                                    className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                    placeholder="localhost"
-                                />
-                            </div>
-
-                            <div>
-                                <label className="block text-sm font-medium text-blue-200 mb-2">Database</label>
-                                <input
-                                    type="text"
-                                    value={settings.mysql_database}
-                                    onChange={(e) => setSettings({ ...settings, mysql_database: e.target.value })}
-                                    className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                    placeholder="price_hunter"
-                                />
-                            </div>
-
-                            <div>
-                                <label className="block text-sm font-medium text-blue-200 mb-2">User</label>
-                                <input
-                                    type="text"
-                                    value={settings.mysql_user}
-                                    onChange={(e) => setSettings({ ...settings, mysql_user: e.target.value })}
-                                    className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                    placeholder="root"
-                                />
-                            </div>
-
-                            <div>
-                                <label className="block text-sm font-medium text-blue-200 mb-2">Password</label>
-                                <div className="relative">
-                                    <input
-                                        type={showPasswords.mysql ? 'text' : 'password'}
-                                        value={settings.mysql_password}
-                                        onChange={(e) => setSettings({ ...settings, mysql_password: e.target.value })}
-                                        className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                        placeholder="••••••••"
-                                    />
-                                    <button
-                                        onClick={() => togglePassword('mysql')}
-                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-blue-300 hover:text-white"
-                                    >
-                                        {showPasswords.mysql ? '👁️' : '👁️‍🗨️'}
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Save Settings Button */}
-                    <button
-                        onClick={handleSaveSettings}
-                        disabled={saving}
-                        className="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white font-semibold py-4 rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                        {saving ? 'กำลังบันทึก...' : '💾 บันทึกการตั้งค่า'}
-                    </button>
-
-                    {/* Admin Credentials */}
-                    <div className="bg-white/10 backdrop-blur-lg rounded-xl p-6 border border-white/20">
-                        <h2 className="text-xl font-bold text-white mb-4">👤 เปลี่ยนข้อมูล Admin</h2>
-                        <div className="space-y-4">
-                            <div>
-                                <label className="block text-sm font-medium text-blue-200 mb-2">
-                                    รหัสผ่านปัจจุบัน *
-                                </label>
-                                <input
-                                    type="password"
-                                    value={credentials.currentPassword}
-                                    onChange={(e) => setCredentials({ ...credentials, currentPassword: e.target.value })}
-                                    className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                    placeholder="••••••••"
-                                />
-                            </div>
-
-                            <div>
-                                <label className="block text-sm font-medium text-blue-200 mb-2">
-                                    Username ใหม่ (ถ้าต้องการเปลี่ยน)
-                                </label>
-                                <input
-                                    type="text"
-                                    value={credentials.newUsername}
-                                    onChange={(e) => setCredentials({ ...credentials, newUsername: e.target.value })}
-                                    className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                    placeholder="admin"
-                                />
-                            </div>
-
-                            <div>
-                                <label className="block text-sm font-medium text-blue-200 mb-2">
-                                    รหัสผ่านใหม่ (ถ้าต้องการเปลี่ยน)
-                                </label>
-                                <input
-                                    type="password"
-                                    value={credentials.newPassword}
-                                    onChange={(e) => setCredentials({ ...credentials, newPassword: e.target.value })}
-                                    className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                    placeholder="••••••••"
-                                />
-                                <p className="text-xs text-blue-300 mt-1">
-                                    ต้องมีอย่างน้อย 8 ตัวอักษร, ตัวพิมพ์ใหญ่, ตัวพิมพ์เล็ก และตัวเลข
-                                </p>
-                            </div>
-
-                            <div>
-                                <label className="block text-sm font-medium text-blue-200 mb-2">
-                                    ยืนยันรหัสผ่านใหม่
-                                </label>
-                                <input
-                                    type="password"
-                                    value={credentials.confirmPassword}
-                                    onChange={(e) => setCredentials({ ...credentials, confirmPassword: e.target.value })}
-                                    className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                    placeholder="••••••••"
-                                />
-                            </div>
-
-                            <button
-                                onClick={handleChangeCredentials}
-                                disabled={saving || !credentials.currentPassword}
-                                className="w-full bg-gradient-to-r from-green-600 to-green-700 text-white font-semibold py-3 rounded-lg hover:from-green-700 hover:to-green-800 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                            >
-                                {saving ? 'กำลังเปลี่ยน...' : '🔐 เปลี่ยนข้อมูล Admin'}
-                            </button>
                         </div>
                     </div>
                 </div>

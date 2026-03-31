@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 
 export default function AdminLogin() {
     const [password, setPassword] = useState('');
@@ -27,7 +28,7 @@ export default function AdminLogin() {
             } else {
                 setError('รหัสผ่านไม่ถูกต้อง');
             }
-        } catch (err) {
+        } catch {
             setError('เกิดข้อผิดพลาด กรุณาลองใหม่');
         } finally {
             setLoading(false);
@@ -35,22 +36,27 @@ export default function AdminLogin() {
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 flex items-center justify-center px-4">
-            <div className="max-w-md w-full">
-                <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-8 border border-white/20">
+        <div className="min-h-screen bg-slate-950 flex items-center justify-center px-4 relative overflow-hidden">
+            {/* Background Effects */}
+            <div className="absolute inset-0 grid-pattern" />
+            <div className="floating-orb w-[400px] h-[400px] bg-blue-600/20 top-[-100px] right-[-100px]" />
+            <div className="floating-orb w-[300px] h-[300px] bg-purple-600/15 bottom-[-50px] left-[-100px]" />
+
+            <div className="max-w-md w-full relative z-10">
+                <div className="glass-card p-8">
                     <div className="text-center mb-8">
-                        <div className="w-16 h-16 bg-gradient-to-br from-blue-600 to-blue-700 rounded-xl flex items-center justify-center mx-auto mb-4">
+                        <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-5 shadow-lg shadow-blue-500/20">
                             <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                             </svg>
                         </div>
-                        <h1 className="text-2xl font-bold text-white mb-2">Admin Login</h1>
-                        <p className="text-blue-200 text-sm">กรุณาใส่รหัสผ่านเพื่อเข้าสู่ระบบ</p>
+                        <h1 className="text-2xl font-extrabold text-white mb-2">Admin Login</h1>
+                        <p className="text-white/40 text-sm">กรุณาใส่รหัสผ่านเพื่อเข้าสู่ระบบ</p>
                     </div>
 
-                    <form onSubmit={handleSubmit} className="space-y-6">
+                    <form onSubmit={handleSubmit} className="space-y-5">
                         <div>
-                            <label htmlFor="password" className="block text-sm font-medium text-blue-200 mb-2">
+                            <label htmlFor="password" className="block text-sm font-medium text-white/60 mb-2">
                                 รหัสผ่าน
                             </label>
                             <input
@@ -58,7 +64,7 @@ export default function AdminLogin() {
                                 id="password"
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
-                                className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                className="w-full px-4 py-3.5 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/25 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all"
                                 placeholder="••••••••"
                                 required
                                 autoFocus
@@ -66,7 +72,10 @@ export default function AdminLogin() {
                         </div>
 
                         {error && (
-                            <div className="bg-red-500/20 border border-red-500/50 rounded-lg p-3 text-red-200 text-sm">
+                            <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-3.5 text-red-300 text-sm flex items-center gap-2">
+                                <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
                                 {error}
                             </div>
                         )}
@@ -74,16 +83,23 @@ export default function AdminLogin() {
                         <button
                             type="submit"
                             disabled={loading}
-                            className="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white font-semibold py-3 rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white font-bold py-3.5 rounded-xl hover:from-blue-600 hover:to-purple-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-blue-500/20 hover:shadow-blue-500/30"
                         >
-                            {loading ? 'กำลังเข้าสู่ระบบ...' : 'เข้าสู่ระบบ'}
+                            {loading ? (
+                                <span className="flex items-center justify-center gap-2">
+                                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                    กำลังเข้าสู่ระบบ...
+                                </span>
+                            ) : (
+                                'เข้าสู่ระบบ'
+                            )}
                         </button>
                     </form>
 
                     <div className="mt-6 text-center">
-                        <a href="/" className="text-blue-300 hover:text-blue-200 text-sm transition-colors">
+                        <Link href="/" className="text-white/40 hover:text-white/70 text-sm transition-colors">
                             ← กลับหน้าแรก
-                        </a>
+                        </Link>
                     </div>
                 </div>
             </div>
